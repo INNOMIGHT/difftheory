@@ -1,0 +1,2069 @@
+.match-analysis-page {
+    width: 100%;
+    max-width: 1500px;
+    margin: 0 auto;
+    padding-bottom: 55px;
+}
+
+
+/* ==========================================================
+   SHARED
+========================================================== */
+
+.analysis-eyebrow,
+.analysis-section-heading > p {
+    margin: 0;
+    color: var(--primary);
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+}
+
+
+.analysis-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 17px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 9px;
+    font-weight: 850;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+}
+
+.analysis-back:hover {
+    color: var(--primary);
+}
+
+
+.analysis-section-heading {
+    margin: 46px 0 17px;
+}
+
+.analysis-section-heading h2 {
+    margin: 5px 0 0;
+    color: var(--text);
+    font-size: clamp(23px, 2.4vw, 32px);
+    font-weight: 950;
+    letter-spacing: -0.75px;
+}
+
+.analysis-section-heading > span {
+    display: block;
+    max-width: 800px;
+    margin-top: 7px;
+    color: var(--text-secondary);
+    font-size: 10px;
+    line-height: 1.65;
+}
+
+
+/* ==========================================================
+   PAGE STATES
+========================================================== */
+
+.analysis-state,
+.match-analysis-empty {
+    min-height: 500px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.analysis-state strong {
+    margin-top: 14px;
+    color: var(--text);
+    font-size: 15px;
+}
+
+.analysis-state p,
+.match-analysis-empty > p {
+    max-width: 480px;
+    color: var(--text-muted);
+    font-size: 10px;
+    line-height: 1.7;
+}
+
+.analysis-state button,
+.match-analysis-empty button {
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 12px;
+    padding: 0 15px;
+    border: 1px solid var(--primary-border);
+    background: var(--primary-muted);
+    color: var(--primary);
+    font-size: 9px;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.analysis-error-state > svg {
+    color: var(--negative);
+}
+
+.analysis-empty-icon {
+    width: 58px;
+    height: 58px;
+    display: grid;
+    place-items: center;
+    margin-bottom: 16px;
+    border: 1px solid var(--primary-border);
+    background: var(--primary-muted);
+    color: var(--primary);
+}
+
+.match-analysis-empty h1 {
+    margin: 6px 0 0;
+    color: var(--text);
+}
+
+
+/* ==========================================================
+   HERO
+========================================================== */
+
+.analysis-hero {
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns:
+        auto
+        minmax(0, 1fr)
+        minmax(220px, 0.32fr);
+    gap: 25px;
+    align-items: center;
+    min-height: 250px;
+    padding: 34px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+}
+
+.analysis-hero-grid {
+    position: absolute;
+    inset: 0;
+    opacity: 0.07;
+    pointer-events: none;
+    background-image:
+        linear-gradient(
+            var(--text-muted) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            var(--text-muted) 1px,
+            transparent 1px
+        );
+    background-size: 38px 38px;
+}
+
+.analysis-win {
+    border-left: 4px solid var(--positive);
+}
+
+.analysis-loss {
+    border-left: 4px solid var(--negative);
+}
+
+.analysis-champion-mark {
+    position: relative;
+    z-index: 1;
+    width: 86px;
+    height: 86px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+    font-size: 36px;
+    font-weight: 1000;
+}
+
+.analysis-hero-main {
+    position: relative;
+    z-index: 1;
+}
+
+.analysis-result-line {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin-top: 9px;
+}
+
+.analysis-result-line > span {
+    color: var(--text-muted);
+    font-size: 8px;
+    font-weight: 800;
+}
+
+.analysis-result-line .result-win {
+    padding: 4px 6px;
+    background: rgba(53, 201, 138, 0.1);
+    color: var(--positive);
+    font-weight: 950;
+}
+
+.analysis-result-line .result-loss {
+    padding: 4px 6px;
+    background: rgba(240, 91, 91, 0.1);
+    color: var(--negative);
+    font-weight: 950;
+}
+
+.analysis-hero-main h1 {
+    margin: 9px 0 8px;
+    color: var(--text);
+    font-size: clamp(30px, 4vw, 48px);
+    font-weight: 1000;
+    letter-spacing: -1.4px;
+}
+
+.analysis-hero-main h1 span {
+    margin-left: 9px;
+    color: var(--text-muted);
+    font-size: 0.35em;
+    font-weight: 750;
+}
+
+.analysis-hero-copy {
+    max-width: 680px;
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 10px;
+    line-height: 1.7;
+}
+
+.analysis-hero-side {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    border: 1px solid var(--border-soft);
+    background: rgba(0, 0, 0, 0.12);
+}
+
+.analysis-hero-side > div {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.analysis-hero-side > div:last-child {
+    border-bottom: 0;
+}
+
+.analysis-hero-side span {
+    display: block;
+    color: var(--text-muted);
+    font-size: 6px;
+    font-weight: 900;
+    letter-spacing: 0.9px;
+}
+
+.analysis-hero-side strong {
+    display: block;
+    margin-top: 3px;
+    color: var(--text);
+    font-size: 11px;
+}
+
+.hero-kda strong {
+    color: var(--primary);
+    font-size: 17px;
+}
+
+
+/* ==========================================================
+   STAT STRIP
+========================================================== */
+
+.analysis-stat-strip {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    border: 1px solid var(--border-soft);
+    border-top: 0;
+    background: var(--surface);
+}
+
+.analysis-stat {
+    min-width: 0;
+    padding: 17px 19px;
+    border-right: 1px solid var(--border-soft);
+}
+
+.analysis-stat:last-child {
+    border-right: 0;
+}
+
+.analysis-stat > svg {
+    margin-bottom: 8px;
+}
+
+.analysis-stat > span {
+    display: block;
+    color: var(--text-muted);
+    font-size: 6px;
+    font-weight: 900;
+    letter-spacing: 0.9px;
+}
+
+.analysis-stat > strong {
+    display: block;
+    margin-top: 3px;
+    color: var(--text);
+    font-size: 24px;
+    font-weight: 1000;
+}
+
+.analysis-stat > small {
+    display: block;
+    margin-top: 2px;
+    color: var(--text-muted);
+    font-size: 7px;
+}
+
+.stat-negative > svg {
+    color: var(--negative);
+}
+
+.stat-positive > svg {
+    color: var(--positive);
+}
+
+.stat-neutral > svg {
+    color: var(--primary);
+}
+
+
+/* ==========================================================
+   IMPACT SUMMARY HERO
+========================================================== */
+
+.impact-summary-hero {
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns:
+        minmax(280px, 0.45fr)
+        minmax(0, 1fr);
+    gap: 28px;
+    padding: 30px;
+    border: 1px solid var(--primary-border);
+    background:
+        radial-gradient(
+            circle at 0% 0%,
+            var(--primary-muted),
+            transparent 42%
+        ),
+        var(--surface);
+}
+
+.impact-summary-main {
+    display: flex;
+    align-items: flex-start;
+    gap: 17px;
+    padding-right: 28px;
+    border-right: 1px solid var(--border-soft);
+}
+
+.impact-summary-icon {
+    flex: 0 0 auto;
+    width: 50px;
+    height: 50px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--primary-border);
+    background: var(--primary-muted);
+    color: var(--primary);
+}
+
+.impact-summary-label {
+    display: block;
+    color: var(--text-muted);
+    font-size: 8px;
+    font-weight: 950;
+    letter-spacing: 1.25px;
+}
+
+.net-impact-value {
+    margin-top: 7px;
+    color: var(--primary);
+    font-size: clamp(42px, 5.5vw, 76px);
+    font-weight: 1000;
+    line-height: 0.95;
+    letter-spacing: -2px;
+    overflow-wrap: anywhere;
+}
+
+.impact-summary-main p {
+    max-width: 430px;
+    margin: 13px 0 0;
+    color: var(--text-secondary);
+    font-size: 10px;
+    line-height: 1.65;
+}
+
+.impact-summary-breakdown {
+    min-width: 0;
+    align-self: center;
+}
+
+
+/* ==========================================================
+   HIGHEST LEVERAGE OPPORTUNITIES
+========================================================== */
+
+.leverage-panel {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--primary-border);
+    background:
+        linear-gradient(
+            135deg,
+            var(--primary-muted),
+            transparent 34%
+        ),
+        var(--surface);
+}
+
+
+/* ==========================================================
+   HEADER
+========================================================== */
+
+.leverage-hero {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+    padding: 28px 30px;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+
+.leverage-hero::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 220px;
+    height: 100%;
+    pointer-events: none;
+    background:
+        linear-gradient(
+            135deg,
+            transparent,
+            var(--primary-muted)
+        );
+    opacity: 0.45;
+}
+
+
+.leverage-hero-icon {
+    position: relative;
+    z-index: 1;
+    flex: 0 0 auto;
+    width: 52px;
+    height: 52px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--primary-border);
+    background: var(--surface-2);
+    color: var(--primary);
+}
+
+
+.leverage-hero > div:last-child {
+    position: relative;
+    z-index: 1;
+    min-width: 0;
+}
+
+
+.leverage-hero span {
+    display: block;
+    color: var(--primary);
+    font-size: 8px;
+    font-weight: 950;
+    letter-spacing: 1.35px;
+}
+
+
+.leverage-hero strong {
+    display: block;
+    max-width: 900px;
+    margin-top: 6px;
+    color: var(--text);
+    font-size: clamp(
+        20px,
+        2vw,
+        27px
+    );
+    font-weight: 950;
+    line-height: 1.22;
+    letter-spacing: -0.5px;
+}
+
+
+.leverage-hero p {
+    max-width: 850px;
+    margin: 9px 0 0;
+    color: var(--text-secondary);
+    font-size: 10px;
+    line-height: 1.65;
+}
+
+
+/* ==========================================================
+   OPPORTUNITY LIST
+========================================================== */
+
+.leverage-opportunity-list {
+    display: grid;
+    grid-template-columns:
+        repeat(
+            3,
+            minmax(
+                0,
+                1fr
+            )
+        );
+    gap: 0;
+}
+
+
+/* ==========================================================
+   OPPORTUNITY CARD
+========================================================== */
+
+.leverage-opportunity-card {
+    position: relative;
+    min-width: 0;
+    padding: 24px;
+    border-right: 1px solid var(--border-soft);
+    background: transparent;
+    transition:
+        background var(--transition),
+        transform var(--transition);
+}
+
+
+.leverage-opportunity-card:last-child {
+    border-right: 0;
+}
+
+
+.leverage-opportunity-card:hover {
+    background: var(--surface-2);
+}
+
+
+.leverage-opportunity-rank {
+    position: absolute;
+    top: 18px;
+    right: 20px;
+}
+
+
+.leverage-opportunity-rank span {
+    color: var(--text-muted);
+    font-size: 26px;
+    font-weight: 1000;
+    letter-spacing: -1px;
+    opacity: 0.45;
+}
+
+
+.leverage-opportunity-main {
+    min-width: 0;
+}
+
+
+/* ==========================================================
+   META
+========================================================== */
+
+.leverage-opportunity-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 7px;
+    padding-right: 40px;
+}
+
+
+.leverage-minute,
+.leverage-type {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 25px;
+    padding: 0 8px;
+    border: 1px solid var(--border-soft);
+    background: var(--surface-2);
+    font-size: 7px;
+    font-weight: 900;
+    letter-spacing: 0.65px;
+}
+
+
+.leverage-minute {
+    color: var(--text-secondary);
+}
+
+
+.leverage-minute svg {
+    color: var(--primary);
+}
+
+
+.leverage-type {
+    border-color: var(--primary-border);
+    background: var(--primary-muted);
+    color: var(--primary);
+}
+
+
+/* ==========================================================
+   TITLE
+========================================================== */
+
+.leverage-opportunity-main h3 {
+    max-width: 90%;
+    margin: 15px 0 0;
+    color: var(--text);
+    font-size: clamp(
+        16px,
+        1.4vw,
+        20px
+    );
+    font-weight: 950;
+    line-height: 1.28;
+    letter-spacing: -0.3px;
+}
+
+
+/* ==========================================================
+   EVIDENCE
+========================================================== */
+
+.leverage-evidence {
+    margin-top: 20px;
+}
+
+
+.leverage-evidence-highlight {
+    display: grid;
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(
+                0,
+                1fr
+            )
+        );
+    gap: 7px;
+}
+
+
+.leverage-evidence-highlight > div {
+    min-width: 0;
+    padding: 11px 12px;
+    border: 1px solid var(--border-soft);
+    background: var(--surface-2);
+}
+
+
+.leverage-evidence-highlight span {
+    display: block;
+    color: var(--text-muted);
+    font-size: 6px;
+    font-weight: 900;
+    letter-spacing: 0.75px;
+}
+
+
+.leverage-evidence-highlight strong {
+    display: block;
+    margin-top: 5px;
+    color: var(--text);
+    font-size: 17px;
+    font-weight: 950;
+}
+
+
+.leverage-negative {
+    color: var(--negative) !important;
+}
+
+
+/* ==========================================================
+   OBJECTIVE OPPORTUNITY
+========================================================== */
+
+.objective-opportunity {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 15px;
+    border: 1px solid var(--border-soft);
+    background: var(--surface-2);
+}
+
+
+.objective-opportunity-icon {
+    flex: 0 0 auto;
+    width: 39px;
+    height: 39px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--primary-border);
+    background: var(--primary-muted);
+    color: var(--primary);
+}
+
+
+.objective-opportunity > div:last-child {
+    min-width: 0;
+}
+
+
+.objective-opportunity span {
+    display: block;
+    color: var(--text-muted);
+    font-size: 6px;
+    font-weight: 900;
+    letter-spacing: 0.75px;
+}
+
+
+.objective-opportunity strong {
+    display: block;
+    margin-top: 3px;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 900;
+}
+
+
+.objective-opportunity p {
+    margin: 5px 0 0;
+    color: var(--text-secondary);
+    font-size: 9px;
+    line-height: 1.45;
+}
+
+
+.objective-opportunity p b {
+    color: var(--primary);
+    font-weight: 900;
+}
+
+
+/* ==========================================================
+   EMPTY STATE
+========================================================== */
+
+.leverage-empty {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 22px;
+}
+
+
+.leverage-empty > svg {
+    flex: 0 0 auto;
+    color: var(--text-muted);
+}
+
+
+.leverage-empty strong {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 10px;
+}
+
+
+.leverage-empty p {
+    margin: 4px 0 0;
+    color: var(--text-muted);
+    font-size: 8px;
+    line-height: 1.5;
+}
+
+
+/* ==========================================================
+   SINGLE RECORD FALLBACK
+========================================================== */
+
+.leverage-single-record {
+    padding: 0 28px 26px;
+}
+
+
+/* ==========================================================
+   RESPONSIVE
+========================================================== */
+
+@media (max-width: 1150px) {
+    .leverage-opportunity-list {
+        grid-template-columns: 1fr;
+    }
+
+    .leverage-opportunity-card {
+        border-right: 0;
+        border-bottom: 1px solid var(--border-soft);
+    }
+
+    .leverage-opportunity-card:last-child {
+        border-bottom: 0;
+    }
+
+    .leverage-evidence-highlight {
+        grid-template-columns:
+            repeat(
+                4,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
+    }
+}
+
+
+@media (max-width: 800px) {
+    .leverage-hero {
+        padding: 22px;
+    }
+
+    .leverage-evidence-highlight {
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
+    }
+
+    .leverage-opportunity-card {
+        padding: 21px;
+    }
+}
+
+
+@media (max-width: 560px) {
+    .leverage-hero {
+        flex-direction: column;
+    }
+
+    .leverage-hero-icon {
+        width: 44px;
+        height: 44px;
+    }
+
+    .leverage-hero strong {
+        font-size: 18px;
+    }
+
+    .leverage-opportunity-main h3 {
+        max-width: 100%;
+        padding-right: 34px;
+    }
+
+    .leverage-evidence-highlight {
+        grid-template-columns: 1fr;
+    }
+
+    .objective-opportunity {
+        align-items: flex-start;
+    }
+}
+/* ==========================================================
+   SUMMARY PANEL
+========================================================== */
+
+.analysis-summary-panel {
+    min-width: 0;
+    padding: 23px;
+    border: 1px solid var(--border-soft);
+    background: var(--surface);
+}
+
+.summary-panel-heading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 17px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.summary-panel-heading > div {
+    width: 35px;
+    height: 35px;
+    display: grid;
+    place-items: center;
+    background: var(--surface-2);
+}
+
+.summary-panel-heading h3 {
+    margin: 0;
+    color: var(--text);
+    font-size: 15px;
+}
+
+.summary-tone-primary .summary-panel-heading svg {
+    color: var(--primary);
+}
+
+.summary-tone-negative .summary-panel-heading svg {
+    color: var(--negative);
+}
+
+.summary-tone-neutral .summary-panel-heading svg {
+    color: var(--text-secondary);
+}
+
+
+/* ==========================================================
+   PERFORMANCE / RESOURCE GRIDS
+========================================================== */
+
+.performance-grid,
+.resource-detail-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(0, 1fr)
+        );
+    gap: 14px;
+}
+
+
+/* ==========================================================
+   TIMELINE
+========================================================== */
+
+.timeline-panel,
+.signal-section {
+    border: 1px solid var(--border-soft);
+    background: var(--surface);
+}
+
+.analysis-timeline {
+    padding: 5px 24px;
+}
+
+.timeline-row {
+    position: relative;
+    display: grid;
+    grid-template-columns:
+        35px
+        80px
+        minmax(0, 1fr);
+    gap: 14px;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.timeline-row:last-child {
+    border-bottom: 0;
+}
+
+.timeline-row::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 17px;
+    width: 1px;
+    background: var(--border-soft);
+}
+
+.timeline-marker {
+    position: relative;
+    z-index: 1;
+    width: 35px;
+    height: 35px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--surface-2);
+}
+
+.timeline-critical .timeline-marker {
+    border: 1px solid rgba(240, 91, 91, 0.35);
+    color: var(--negative);
+}
+
+.timeline-positive .timeline-marker {
+    border: 1px solid rgba(53, 201, 138, 0.35);
+    color: var(--positive);
+}
+
+.timeline-time {
+    display: flex;
+    align-items: flex-start;
+    gap: 4px;
+    padding-top: 9px;
+    color: var(--text-muted);
+    font-size: 8px;
+    font-weight: 800;
+}
+
+.timeline-content {
+    min-width: 0;
+}
+
+.timeline-title-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.timeline-title-row > div > span {
+    color: var(--text-muted);
+    font-size: 6px;
+    font-weight: 900;
+    letter-spacing: 0.9px;
+}
+
+.timeline-critical
+.timeline-title-row
+> div
+> span {
+    color: var(--negative);
+}
+
+.timeline-positive
+.timeline-title-row
+> div
+> span {
+    color: var(--positive);
+}
+
+.timeline-title-row h3 {
+    margin: 4px 0 0;
+    color: var(--text);
+    font-size: 13px;
+}
+
+.timeline-severity {
+    flex: 0 0 auto;
+    padding: 4px 6px;
+    border: 1px solid var(--border-soft);
+    color: var(--text-secondary);
+    font-size: 7px;
+}
+
+.moment-reasons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 10px;
+}
+
+.moment-reasons span {
+    padding: 4px 6px;
+    border: 1px solid var(--border-soft);
+    background: var(--surface-2);
+    color: var(--text-muted);
+    font-size: 7px;
+}
+
+.timeline-expand {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 12px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--primary);
+    font-size: 7px;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.timeline-expand svg,
+.analysis-view-all svg {
+    transition: transform var(--transition);
+}
+
+.timeline-expand svg.expanded,
+.analysis-view-all svg.expanded {
+    transform: rotate(180deg);
+}
+
+
+/* ==========================================================
+   VIEW ALL
+========================================================== */
+
+.analysis-view-all {
+    width: 100%;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 0;
+    border-top: 1px solid var(--border-soft);
+    background: var(--surface-2);
+    color: var(--primary);
+    font-size: 8px;
+    font-weight: 950;
+    letter-spacing: 0.8px;
+    cursor: pointer;
+    transition:
+        background var(--transition),
+        color var(--transition);
+}
+
+.analysis-view-all:hover {
+    background: var(--primary-muted);
+}
+
+
+/* ==========================================================
+   RECORD GRID
+========================================================== */
+
+.record-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(0, 1fr)
+        );
+    gap: 7px;
+    margin-top: 12px;
+}
+
+.record-grid-compact {
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(0, 1fr)
+        );
+    gap: 5px;
+}
+
+.record-item {
+    min-width: 0;
+    padding: 10px;
+    border: 1px solid var(--border-soft);
+    background: var(--surface-2);
+}
+
+.record-item span,
+.record-array > span {
+    display: block;
+    color: var(--text-muted);
+    font-size: 6px;
+    font-weight: 850;
+    letter-spacing: 0.5px;
+}
+
+.record-item strong {
+    display: block;
+    margin-top: 4px;
+    overflow-wrap: anywhere;
+    color: var(--text-secondary);
+    font-size: 9px;
+}
+
+.record-item-compact {
+    padding: 7px;
+}
+
+.record-array {
+    grid-column: 1 / -1;
+    padding: 8px;
+    border: 1px solid var(--border-soft);
+    background: var(--surface-2);
+}
+
+.record-array > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 6px;
+}
+
+.record-array b {
+    padding: 3px 5px;
+    background: var(--surface-3);
+    color: var(--text-secondary);
+    font-size: 7px;
+    font-weight: 650;
+}
+
+.record-nested {
+    grid-column: 1 / -1;
+    border: 1px solid var(--border-soft);
+    background: var(--surface-2);
+}
+
+.record-nested summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px;
+    color: var(--text-secondary);
+    font-size: 8px;
+    font-weight: 800;
+    cursor: pointer;
+    list-style: none;
+}
+
+.record-nested summary::-webkit-details-marker {
+    display: none;
+}
+
+.record-nested summary svg {
+    margin-left: auto;
+    transition: transform var(--transition);
+}
+
+.record-nested[open]
+summary svg {
+    transform: rotate(90deg);
+}
+
+.record-nested summary small {
+    margin-left: auto;
+    color: var(--text-muted);
+    font-size: 7px;
+}
+
+.record-nested summary small + svg {
+    margin-left: 0;
+}
+
+.record-nested > .record-grid,
+.nested-array {
+    margin: 0;
+    padding: 8px;
+    border-top: 1px solid var(--border-soft);
+}
+
+
+/* ==========================================================
+   SIGNALS
+========================================================== */
+
+.signal-section {
+    overflow: hidden;
+}
+
+.signal-analysis-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(
+            3,
+            minmax(0, 1fr)
+        );
+    gap: 10px;
+    padding: 16px;
+}
+
+.coaching-signal-card {
+    min-width: 0;
+    padding: 16px;
+    border: 1px solid var(--border-soft);
+    background: var(--surface-2);
+}
+
+.signal-negative {
+    border-top: 2px solid var(--negative);
+}
+
+.signal-positive {
+    border-top: 2px solid var(--positive);
+}
+
+.signal-card-top {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.signal-card-top > div {
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    background: var(--surface);
+}
+
+.signal-negative
+.signal-card-top
+> div {
+    color: var(--negative);
+}
+
+.signal-positive
+.signal-card-top
+> div {
+    color: var(--positive);
+}
+
+.signal-card-top > span {
+    color: var(--text-muted);
+    font-size: 6px;
+    font-weight: 900;
+    letter-spacing: 0.7px;
+}
+
+.signal-card-top b {
+    margin-left: auto;
+    color: var(--text-secondary);
+    font-size: 8px;
+}
+
+.coaching-signal-card h3 {
+    margin: 12px 0 7px;
+    color: var(--text);
+    font-size: 11px;
+}
+
+.signal-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.signal-meta span {
+    padding: 3px 5px;
+    background: var(--surface);
+    color: var(--text-muted);
+    font-size: 6px;
+}
+
+
+/* ==========================================================
+   RESOURCE
+========================================================== */
+
+.resource-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(0, 1fr)
+        );
+    gap: 14px;
+}
+
+.disruption-panel {
+    min-width: 0;
+    padding: 20px;
+    border: 1px solid var(--border-soft);
+    background: var(--surface);
+}
+
+.disruption-heading {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    margin-bottom: 15px;
+}
+
+.disruption-icon {
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    background: var(--surface-2);
+    color: var(--primary);
+}
+
+.disruption-heading span {
+    display: block;
+    color: var(--text-muted);
+    font-size: 6px;
+    font-weight: 900;
+    letter-spacing: 0.7px;
+}
+
+.disruption-heading h3 {
+    margin: 2px 0 0;
+    color: var(--text);
+    font-size: 13px;
+}
+
+.disruption-heading > strong {
+    margin-left: auto;
+    color: var(--primary);
+    font-size: 20px;
+}
+
+.disruption-row {
+    padding: 13px 0;
+    border-top: 1px solid var(--border-soft);
+}
+
+.disruption-row
+> div:first-child {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.disruption-row
+> div:first-child
+span {
+    color: var(--primary);
+    font-size: 8px;
+    font-weight: 850;
+}
+
+.disruption-row
+> div:first-child
+strong {
+    color: var(--text);
+    font-size: 9px;
+}
+
+
+/* ==========================================================
+   RECOMMENDATIONS
+========================================================== */
+
+.recommendations-panel {
+    display: grid;
+    gap: 10px;
+}
+
+.recommendation-card {
+    display: grid;
+    grid-template-columns:
+        42px
+        42px
+        minmax(0, 1fr);
+    gap: 14px;
+    align-items: flex-start;
+    padding: 20px;
+    border: 1px solid var(--border-soft);
+    background: var(--surface);
+}
+
+.recommendation-number {
+    padding-top: 7px;
+    color: var(--primary);
+    font-size: 17px;
+    font-weight: 1000;
+}
+
+.recommendation-icon {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    background: var(--primary-muted);
+    color: var(--primary);
+}
+
+.recommendation-card
+> div:last-child
+> span {
+    color: var(--primary);
+    font-size: 6px;
+    font-weight: 900;
+    letter-spacing: 0.8px;
+}
+
+.recommendation-card h3 {
+    margin: 4px 0;
+    color: var(--text);
+    font-size: 14px;
+}
+
+.recommendation-card p {
+    margin: 5px 0 0;
+    color: var(--text-secondary);
+    font-size: 9px;
+    line-height: 1.6;
+}
+
+
+/* ==========================================================
+   EMPTY / METHODOLOGY
+========================================================== */
+
+.analysis-empty-inline {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 13px;
+    color: var(--text-muted);
+    font-size: 8px;
+}
+
+.analysis-empty-inline svg {
+    flex: 0 0 auto;
+    color: var(--positive);
+}
+
+.analysis-methodology {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 36px;
+    padding: 16px;
+    border: 1px solid var(--border-soft);
+    background: var(--bg-soft);
+}
+
+.analysis-methodology > svg {
+    flex: 0 0 auto;
+    color: var(--primary);
+}
+
+.analysis-methodology strong {
+    color: var(--text-secondary);
+    font-size: 9px;
+}
+
+.analysis-methodology p {
+    max-width: 800px;
+    margin: 4px 0 0;
+    color: var(--text-muted);
+    font-size: 8px;
+    line-height: 1.6;
+}
+
+
+/* ==========================================================
+   RESPONSIVE
+========================================================== */
+
+@media (max-width: 1100px) {
+    .signal-analysis-grid {
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
+    }
+
+    .impact-summary-hero {
+        grid-template-columns: 1fr;
+    }
+
+    .impact-summary-main {
+        padding-right: 0;
+        padding-bottom: 22px;
+        border-right: 0;
+        border-bottom: 1px solid var(--border-soft);
+    }
+}
+
+
+@media (max-width: 850px) {
+    .analysis-hero {
+        grid-template-columns:
+            auto
+            minmax(
+                0,
+                1fr
+            );
+    }
+
+    .analysis-hero-side {
+        grid-column: 1 / -1;
+        grid-template-columns:
+            repeat(
+                4,
+                1fr
+            );
+    }
+
+    .analysis-hero-side > div {
+        border-right: 1px solid var(--border-soft);
+        border-bottom: 0;
+    }
+
+    .analysis-stat-strip {
+        grid-template-columns:
+            repeat(
+                2,
+                1fr
+            );
+    }
+
+    .analysis-stat:nth-child(2) {
+        border-right: 0;
+    }
+
+    .analysis-stat:nth-child(-n + 2) {
+        border-bottom: 1px solid var(--border-soft);
+    }
+
+    .performance-grid,
+    .resource-detail-grid,
+    .resource-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .signal-analysis-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+@media (max-width: 620px) {
+    .analysis-hero {
+        grid-template-columns: 1fr;
+        padding: 22px;
+    }
+
+    .analysis-champion-mark {
+        width: 60px;
+        height: 60px;
+        font-size: 25px;
+    }
+
+    .analysis-hero-main h1 span {
+        display: block;
+        margin: 5px 0 0;
+    }
+
+    .analysis-hero-side {
+        grid-column: auto;
+        grid-template-columns:
+            repeat(
+                2,
+                1fr
+            );
+    }
+
+    .analysis-hero-side > div {
+        border-right: 1px solid var(--border-soft);
+        border-bottom: 1px solid var(--border-soft);
+    }
+
+    .analysis-stat-strip {
+        grid-template-columns: 1fr;
+    }
+
+    .analysis-stat {
+        border-right: 0;
+        border-bottom: 1px solid var(--border-soft);
+    }
+
+    .impact-summary-hero {
+        padding: 20px;
+    }
+
+    .impact-summary-main {
+        flex-direction: column;
+    }
+
+    .net-impact-value {
+        font-size: 46px;
+    }
+
+/* ==========================================================
+   HIGHEST LEVERAGE OPPORTUNITIES
+========================================================== */
+
+.leverage-panel {
+    overflow: hidden;
+    border: 1px solid var(--primary-border);
+    background:
+        radial-gradient(
+            circle at 0% 0%,
+            var(--primary-muted),
+            transparent 40%
+        ),
+        var(--surface);
+}
+
+
+.leverage-hero {
+    display: flex;
+    align-items: flex-start;
+    gap: 17px;
+    padding: 28px 30px;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+
+.leverage-hero-icon {
+    flex: 0 0 auto;
+    width: 52px;
+    height: 52px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--primary-border);
+    background: var(--primary-muted);
+    color: var(--primary);
+}
+
+
+.leverage-hero span {
+    display: block;
+    color: var(--primary);
+    font-size: 8px;
+    font-weight: 950;
+    letter-spacing: 1.1px;
+}
+
+
+.leverage-hero strong {
+    display: block;
+    max-width: 850px;
+    margin-top: 5px;
+    color: var(--text);
+    font-size: clamp(
+        18px,
+        2vw,
+        25px
+    );
+    font-weight: 950;
+    line-height: 1.25;
+}
+
+
+.leverage-hero p {
+    max-width: 800px;
+    margin: 8px 0 0;
+    color: var(--text-secondary);
+    font-size: 10px;
+    line-height: 1.65;
+}
+
+
+.leverage-opportunity-list {
+    display: grid;
+}
+
+
+.leverage-opportunity-card {
+    display: grid;
+    grid-template-columns:
+        65px
+        minmax(
+            0,
+            1fr
+        );
+    gap: 20px;
+    padding: 27px 30px;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+
+.leverage-opportunity-card:last-child {
+    border-bottom: 0;
+}
+
+
+.leverage-opportunity-rank {
+    padding-top: 3px;
+}
+
+
+.leverage-opportunity-rank span {
+    color: var(--primary);
+    font-size: 27px;
+    font-weight: 1000;
+    letter-spacing: -1px;
+}
+
+
+.leverage-opportunity-main {
+    min-width: 0;
+}
+
+
+.leverage-opportunity-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+
+.leverage-minute,
+.leverage-type {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 7px;
+    border: 1px solid var(--border-soft);
+    background: var(--surface-2);
+    font-size: 7px;
+    font-weight: 900;
+    letter-spacing: 0.7px;
+}
+
+
+.leverage-minute {
+    color: var(--text-secondary);
+}
+
+
+.leverage-type {
+    color: var(--primary);
+}
+
+
+.leverage-opportunity-main h3 {
+    margin: 10px 0 0;
+    color: var(--text);
+    font-size: clamp(
+        18px,
+        2vw,
+        24px
+    );
+    font-weight: 950;
+    letter-spacing: -0.4px;
+}
+
+
+.leverage-evidence {
+    margin-top: 18px;
+}
+
+
+.leverage-evidence-highlight {
+    display: grid;
+    grid-template-columns:
+        repeat(
+            4,
+            minmax(
+                0,
+                1fr
+            )
+        );
+    border: 1px solid var(--border-soft);
+    background: var(--surface-2);
+}
+
+
+.leverage-evidence-highlight > div {
+    padding: 14px;
+    border-right: 1px solid var(--border-soft);
+}
+
+
+.leverage-evidence-highlight > div:last-child {
+    border-right: 0;
+}
+
+
+.leverage-evidence-highlight span {
+    display: block;
+    color: var(--text-muted);
+    font-size: 6px;
+    font-weight: 900;
+    letter-spacing: 0.8px;
+}
+
+
+.leverage-evidence-highlight strong {
+    display: block;
+    margin-top: 5px;
+    color: var(--text);
+    font-size: 18px;
+    font-weight: 950;
+}
+
+
+.leverage-negative {
+    color: var(--negative) !important;
+}
+
+
+.objective-opportunity {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 15px;
+    border: 1px solid var(--border-soft);
+    background: var(--surface-2);
+}
+
+
+.objective-opportunity-icon {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    background: var(--primary-muted);
+    color: var(--primary);
+}
+
+
+.objective-opportunity span {
+    display: block;
+    color: var(--text-muted);
+    font-size: 6px;
+    font-weight: 900;
+    letter-spacing: 0.8px;
+}
+
+
+.objective-opportunity strong {
+    display: block;
+    margin-top: 3px;
+    color: var(--text);
+    font-size: 13px;
+}
+
+
+.objective-opportunity p {
+    margin: 4px 0 0;
+    color: var(--text-secondary);
+    font-size: 9px;
+}
+
+
+.objective-opportunity p b {
+    color: var(--primary);
+}
+
+
+.leverage-empty {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 22px;
+}
+
+
+.leverage-empty > svg {
+    flex: 0 0 auto;
+    color: var(--text-muted);
+}
+
+
+.leverage-empty strong {
+    color: var(--text-secondary);
+    font-size: 10px;
+}
+
+
+.leverage-empty p {
+    margin: 4px 0 0;
+    color: var(--text-muted);
+    font-size: 8px;
+}
+
+
+@media (max-width: 800px) {
+    .leverage-evidence-highlight {
+        grid-template-columns:
+            repeat(
+                2,
+                1fr
+            );
+    }
+
+    .leverage-evidence-highlight > div:nth-child(2) {
+        border-right: 0;
+    }
+
+    .leverage-evidence-highlight > div:nth-child(-n + 2) {
+        border-bottom: 1px solid var(--border-soft);
+    }
+}
+
+
+@media (max-width: 620px) {
+    .leverage-hero {
+        padding: 21px;
+    }
+
+    .leverage-opportunity-card {
+        grid-template-columns:
+            35px
+            minmax(
+                0,
+                1fr
+            );
+        gap: 10px;
+        padding: 21px;
+    }
+
+    .leverage-opportunity-rank span {
+        font-size: 18px;
+    }
+
+    .leverage-evidence-highlight {
+        grid-template-columns: 1fr;
+    }
+
+    .leverage-evidence-highlight > div {
+        border-right: 0;
+        border-bottom: 1px solid var(--border-soft);
+    }
+
+    .leverage-evidence-highlight > div:last-child {
+        border-bottom: 0;
+    }
+}
+
+    .timeline-row {
+        grid-template-columns:
+            32px
+            minmax(
+                0,
+                1fr
+            );
+        gap: 10px;
+    }
+
+    .timeline-time {
+        grid-column: 2;
+        padding-top: 0;
+    }
+
+    .timeline-content {
+        grid-column: 2;
+    }
+
+    .timeline-title-row {
+        flex-direction: column;
+    }
+
+    .record-grid,
+    .record-grid-compact {
+        grid-template-columns: 1fr;
+    }
+
+    .recommendation-card {
+        grid-template-columns:
+            30px
+            minmax(
+                0,
+                1fr
+            );
+    }
+
+    .recommendation-icon {
+        display: none;
+    }
+}

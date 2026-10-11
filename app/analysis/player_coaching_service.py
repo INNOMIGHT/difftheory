@@ -1,5 +1,7 @@
 from collections import defaultdict
-
+from app.analysis.rank_readiness_service import (
+    RankReadinessService,
+)
 
 class PlayerCoachingService:
 
@@ -305,6 +307,11 @@ class PlayerCoachingService:
         "combat_efficiency":
             "combat",
     }
+
+    def __init__(self):
+        self.rank_readiness_service = (
+            RankReadinessService()
+        )
 
     # ==================================================
     # HELPERS
@@ -1090,6 +1097,17 @@ class PlayerCoachingService:
                     priority_score
                 ),
 
+            "priority_level":
+                self._get_priority_level(
+                    priority_score
+                ),
+
+            "priority_score_explanation":
+                (
+                    "Higher means this issue should receive "
+                    "more attention in your next games."
+                ),
+
             "matches_affected":
                 len(
                     affected_indices
@@ -1139,6 +1157,24 @@ class PlayerCoachingService:
                 ),
         }
 
+
+
+    @staticmethod
+    def _get_priority_level(
+        score,
+    ):
+        if score >= 8.0:
+            return "VERY_HIGH"
+
+        if score >= 6.0:
+            return "HIGH"
+
+        if score >= 4.0:
+            return "MODERATE"
+
+        return "LOW"
+
+    
     # ==================================================
     # POSITIVE THEME
     # ==================================================
@@ -1975,9 +2011,15 @@ class PlayerCoachingService:
     def build(
         self,
         match_analyses,
+        current_rank=None,
     ):
         """
+        Build the aggregate DiffTheory coaching profile.
+
         Match analyses MUST be newest-first.
+
+        current_rank should come from the current LeagueProfile
+        rather than being inferred from historical match analyses.
         """
 
         matches = [
@@ -1997,6 +2039,17 @@ class PlayerCoachingService:
             )
         )
 
+        rank_readiness = (
+            self.rank_readiness_service.build(
+                matches,
+                current_rank=current_rank,
+            )
+        )
+
+        profile[
+            "rank_readiness"
+        ] = rank_readiness
+
         profile[
             "role_breakdown"
         ] = (
@@ -2007,6 +2060,7 @@ class PlayerCoachingService:
 
         return profile
 
+
     # ==================================================
     # BACKWARD-COMPATIBILITY
     # ==================================================
@@ -2014,6 +2068,7 @@ class PlayerCoachingService:
     def analyze_recent_matches(
         self,
         match_analyses,
+        current_rank=None,
     ):
         """
         Compatibility alias for the previous
@@ -2021,5 +2076,6 @@ class PlayerCoachingService:
         """
 
         return self.build(
-            match_analyses
+            match_analyses,
+            current_rank=current_rank,
         )

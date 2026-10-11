@@ -1,3 +1,5 @@
+import time
+
 from app.analysis.performance_analyzer import (
     PerformanceAnalyzer,
 )
@@ -29,11 +31,6 @@ from app.analysis.coaching_signal_adapter import (
 from app.analysis.role_rank_performance_analyzer import (
     RoleRankPerformanceAnalyzer,
 )
-
-
-# ==========================================================
-# CONTEXTUAL / DISRUPTION DETECTORS
-# ==========================================================
 
 from app.services.contextual_farming_service import (
     ContextualFarmingService,
@@ -74,9 +71,18 @@ class MatchAnalysisService:
         economy_efficiency_detector=None,
         economic_disruption_detector=None,
         death_pattern_detector=None,
+        debug_timings=True,
     ):
 
         self.db = db
+
+        # ==================================================
+        # DEBUG
+        # ==================================================
+
+        self.debug_timings = (
+            debug_timings
+        )
 
         # ==================================================
         # MATCH ANALYZERS
@@ -130,11 +136,11 @@ class MatchAnalysisService:
             contextual_farming_service
         )
 
-        # ContextualFarmingService requires a DB session.
         if (
             self.contextual_farming_service is None
             and self.db is not None
         ):
+
             self.contextual_farming_service = (
                 ContextualFarmingService(
                     self.db
@@ -159,6 +165,56 @@ class MatchAnalysisService:
         self.death_pattern_detector = (
             death_pattern_detector
             or DeathPatternDetector()
+        )
+
+    # ==================================================
+    # DEBUG HELPERS
+    # ==================================================
+
+    @staticmethod
+    def _elapsed(
+        started,
+    ):
+
+        return (
+            time.perf_counter()
+            - started
+        )
+
+    def _print_timings(
+        self,
+        timings,
+    ):
+
+        if not self.debug_timings:
+            return
+
+        print()
+        print(
+            "MATCH ANALYSIS PERFORMANCE"
+        )
+
+        print(
+            "-" * 70
+        )
+
+        for (
+            name,
+            seconds,
+        ) in sorted(
+            timings.items(),
+            key=lambda item:
+                item[1],
+            reverse=True,
+        ):
+
+            print(
+                f"{name:<42}"
+                f"{seconds:>12.3f}s"
+            )
+
+        print(
+            "-" * 70
         )
 
     # ==================================================
@@ -208,10 +264,12 @@ class MatchAnalysisService:
                 (jungle or 0)
             )
 
-        cs = getattr(
-            participant,
-            "cs",
-            None,
+        cs = (
+            getattr(
+                participant,
+                "cs",
+                None,
+            )
         )
 
         if cs is not None:
@@ -259,10 +317,12 @@ class MatchAnalysisService:
             frames or []
         ):
 
-            frame_timestamp = getattr(
-                frame,
-                "timestamp_ms",
-                None,
+            frame_timestamp = (
+                getattr(
+                    frame,
+                    "timestamp_ms",
+                    None,
+                )
             )
 
             if frame_timestamp is None:
@@ -296,18 +356,6 @@ class MatchAnalysisService:
     def _normalize_interval_result(
         result,
     ):
-        """
-        ContextualFarmingService.extract_match_intervals()
-        currently returns:
-
-        (
-            [interval, interval, ...],
-            [...]
-        )
-
-        The first tuple item is the interval list used by
-        our disruption detectors.
-        """
 
         if not result:
             return []
@@ -317,27 +365,32 @@ class MatchAnalysisService:
             tuple,
         ):
 
-            if len(result) == 0:
+            if len(
+                result
+            ) == 0:
+
                 return []
 
             intervals = (
-                result[0]
+                result[
+                    0
+                ]
             )
 
             if isinstance(
                 intervals,
                 list,
             ):
+
                 return intervals
 
             return []
 
-        # Defensive compatibility if the service is later
-        # changed to return the flat interval list directly.
         if isinstance(
             result,
             list,
         ):
+
             return result
 
         return []
@@ -350,29 +403,12 @@ class MatchAnalysisService:
     def _extract_economic_candidates(
         result,
     ):
-        """
-        ECON_002 returns:
-
-        {
-            "detector_id": ...,
-            "matches_analyzed": ...,
-            "total_candidates": ...,
-            "metric_summary": ...,
-            "match_results": [
-                {
-                    "candidates": [...]
-                }
-            ]
-        }
-
-        CoachingSignalAdapter expects the actual candidate
-        list, so flatten it here.
-        """
 
         if not isinstance(
             result,
             dict,
         ):
+
             return []
 
         candidates = []
@@ -385,7 +421,9 @@ class MatchAnalysisService:
             or []
         )
 
-        for match_result in match_results:
+        for match_result in (
+            match_results
+        ):
 
             if not isinstance(
                 match_result,
@@ -415,16 +453,8 @@ class MatchAnalysisService:
         player_frames,
         events,
     ):
-        """
-        Build player contextual intervals ONCE and run:
 
-        FARM_002
-        ECON_001
-        ECON_002
-        DEATH_001
-
-        over the same interval data.
-        """
+        timings = {}
 
         if (
             self.contextual_farming_service
@@ -438,7 +468,16 @@ class MatchAnalysisService:
                 "economic_disruptions": [],
                 "economic_disruption_analysis": {},
                 "death_patterns": {},
+                "timings": timings,
             }
+
+        # ==================================================
+        # INTERVAL EXTRACTION
+        # ==================================================
+
+        started = (
+            time.perf_counter()
+        )
 
         raw_interval_result = (
             self.contextual_farming_service
@@ -457,6 +496,14 @@ class MatchAnalysisService:
             )
         )
 
+        timings[
+            "contextual_interval_extraction"
+        ] = (
+            self._elapsed(
+                started
+            )
+        )
+
         intervals = (
             self._normalize_interval_result(
                 raw_interval_result
@@ -472,11 +519,16 @@ class MatchAnalysisService:
                 "economic_disruptions": [],
                 "economic_disruption_analysis": {},
                 "death_patterns": {},
+                "timings": timings,
             }
 
-        # ==========================================
-        # FARMING DISRUPTIONS
-        # ==========================================
+        # ==================================================
+        # FARMING DISRUPTION DETECTOR
+        # ==================================================
+
+        started = (
+            time.perf_counter()
+        )
 
         farming_disruptions = (
             self.farming_disruption_detector
@@ -485,9 +537,21 @@ class MatchAnalysisService:
             )
         )
 
-        # ==========================================
+        timings[
+            "farming_disruption_detector"
+        ] = (
+            self._elapsed(
+                started
+            )
+        )
+
+        # ==================================================
         # ECONOMY EFFICIENCY
-        # ==========================================
+        # ==================================================
+
+        started = (
+            time.perf_counter()
+        )
 
         economy_efficiency = (
             self.economy_efficiency_detector
@@ -496,9 +560,21 @@ class MatchAnalysisService:
             )
         )
 
-        # ==========================================
-        # ECONOMIC DISRUPTIONS
-        # ==========================================
+        timings[
+            "economy_efficiency_detector"
+        ] = (
+            self._elapsed(
+                started
+            )
+        )
+
+        # ==================================================
+        # ECONOMIC DISRUPTION
+        # ==================================================
+
+        started = (
+            time.perf_counter()
+        )
 
         economic_disruption_analysis = (
             self.economic_disruption_detector
@@ -507,20 +583,52 @@ class MatchAnalysisService:
             )
         )
 
+        timings[
+            "economic_disruption_detector"
+        ] = (
+            self._elapsed(
+                started
+            )
+        )
+
+        started = (
+            time.perf_counter()
+        )
+
         economic_disruptions = (
             self._extract_economic_candidates(
                 economic_disruption_analysis
             )
         )
 
-        # ==========================================
+        timings[
+            "economic_candidate_normalization"
+        ] = (
+            self._elapsed(
+                started
+            )
+        )
+
+        # ==================================================
         # DEATH PATTERNS
-        # ==========================================
+        # ==================================================
+
+        started = (
+            time.perf_counter()
+        )
 
         death_patterns = (
             self.death_pattern_detector
             .detect(
                 intervals
+            )
+        )
+
+        timings[
+            "death_pattern_detector"
+        ] = (
+            self._elapsed(
+                started
             )
         )
 
@@ -547,6 +655,9 @@ class MatchAnalysisService:
             "death_patterns":
                 death_patterns
                 or {},
+
+            "timings":
+                timings,
         }
 
     # ==================================================
@@ -559,13 +670,6 @@ class MatchAnalysisService:
         participant,
         frames,
     ):
-        """
-        Build the exact features currently understood
-        by RoleRankPerformanceAnalyzer.
-
-        Fixed-time minute-10 metrics use only data
-        available at or before 10:00.
-        """
 
         if not frames:
             return {}
@@ -573,7 +677,9 @@ class MatchAnalysisService:
         frame_10 = (
             self._frame_at_or_before(
                 frames,
-                10 * 60 * 1000,
+                10
+                * 60
+                * 1000,
             )
         )
 
@@ -588,14 +694,18 @@ class MatchAnalysisService:
 
         features = {}
 
-        # ==========================================
+        # ==================================================
         # MINUTE 10
-        # ==========================================
+        # ==================================================
 
         if frame_10 is not None:
 
             frame_age = (
-                (10 * 60 * 1000)
+                (
+                    10
+                    * 60
+                    * 1000
+                )
                 -
                 getattr(
                     frame_10,
@@ -604,8 +714,6 @@ class MatchAnalysisService:
                 )
             )
 
-            # Same quality rule used by baseline
-            # feature generation.
             if (
                 frame_age
                 <= 90_000
@@ -641,9 +749,9 @@ class MatchAnalysisService:
                     or 0
                 )
 
-        # ==========================================
+        # ==================================================
         # FULL MATCH
-        # ==========================================
+        # ==================================================
 
         final_timestamp_ms = (
             getattr(
@@ -707,9 +815,9 @@ class MatchAnalysisService:
                 / game_minutes
             )
 
-        # ==========================================
+        # ==================================================
         # COMBAT
-        # ==========================================
+        # ==================================================
 
         kills = (
             getattr(
@@ -749,7 +857,8 @@ class MatchAnalysisService:
                 kills
                 + assists
             )
-            / max(
+            /
+            max(
                 deaths,
                 1,
             )
@@ -776,8 +885,13 @@ class MatchAnalysisService:
         if not role:
             return None
 
-        rank = rank.upper()
-        role = role.upper()
+        rank = (
+            rank.upper()
+        )
+
+        role = (
+            role.upper()
+        )
 
         if (
             rank
@@ -788,6 +902,7 @@ class MatchAnalysisService:
                 "DIAMOND",
             }
         ):
+
             return None
 
         features = (
@@ -825,17 +940,13 @@ class MatchAnalysisService:
     def _deduplicate_signals(
         signals,
     ):
-        """
-        Prevent accidental duplicate signals while
-        still allowing the same finding to occur at
-        multiple distinct points in the match.
-        """
 
         unique = []
         seen = set()
 
         for signal in (
-            signals or []
+            signals
+            or []
         ):
 
             key = (
@@ -892,26 +1003,22 @@ class MatchAnalysisService:
         *,
         match,
         participant,
-
-        # Player-specific frames:
         player_frames,
-
-        # Match-wide context:
         all_participants,
         all_frames,
-
-        # Match-wide events:
         events,
-
         rank=None,
         role=None,
-
-        # Optional precomputed results.
-        # If omitted, DiffTheory calculates them here.
         farming_disruptions=None,
         economic_disruptions=None,
         death_patterns=None,
     ):
+
+        analysis_started = (
+            time.perf_counter()
+        )
+
+        timings = {}
 
         role = (
             role
@@ -933,8 +1040,10 @@ class MatchAnalysisService:
 
         detector_results = None
 
-        # Run detector pipeline if any required detector
-        # result was not explicitly supplied.
+        started = (
+            time.perf_counter()
+        )
+
         if (
             farming_disruptions is None
             or economic_disruptions is None
@@ -954,6 +1063,23 @@ class MatchAnalysisService:
 
                     events=
                         events,
+                )
+            )
+
+        timings[
+            "context_detector_pipeline_total"
+        ] = (
+            self._elapsed(
+                started
+            )
+        )
+
+        if detector_results:
+
+            timings.update(
+                detector_results.get(
+                    "timings",
+                    {},
                 )
             )
 
@@ -1021,6 +1147,10 @@ class MatchAnalysisService:
         # 2. BASIC PERFORMANCE
         # ==================================================
 
+        started = (
+            time.perf_counter()
+        )
+
         performance = (
             self.performance_analyzer
             .analyze(
@@ -1035,9 +1165,21 @@ class MatchAnalysisService:
             )
         )
 
+        timings[
+            "performance_analyzer"
+        ] = (
+            self._elapsed(
+                started
+            )
+        )
+
         # ==================================================
         # 3. CRITICAL NEGATIVE MOMENTS
         # ==================================================
+
+        started = (
+            time.perf_counter()
+        )
 
         critical_result = (
             self.critical_moment_analyzer
@@ -1056,6 +1198,14 @@ class MatchAnalysisService:
             )
         )
 
+        timings[
+            "critical_moment_analyzer"
+        ] = (
+            self._elapsed(
+                started
+            )
+        )
+
         critical_moments = (
             critical_result.get(
                 "critical_moments",
@@ -1067,6 +1217,10 @@ class MatchAnalysisService:
         # 4. POSITIVE MOMENTS
         # ==================================================
 
+        started = (
+            time.perf_counter()
+        )
+
         positive_result = (
             self.positive_moment_analyzer
             .analyze(
@@ -1075,6 +1229,14 @@ class MatchAnalysisService:
 
                 events=
                     events,
+            )
+        )
+
+        timings[
+            "positive_moment_analyzer"
+        ] = (
+            self._elapsed(
+                started
             )
         )
 
@@ -1089,6 +1251,10 @@ class MatchAnalysisService:
         # 5. IMPACT SUMMARY
         # ==================================================
 
+        started = (
+            time.perf_counter()
+        )
+
         impact_summary = (
             self.impact_summary
             .build(
@@ -1100,9 +1266,21 @@ class MatchAnalysisService:
             )
         )
 
+        timings[
+            "impact_summary"
+        ] = (
+            self._elapsed(
+                started
+            )
+        )
+
         # ==================================================
         # 6. RANK-RELATIVE PERFORMANCE
         # ==================================================
+
+        started = (
+            time.perf_counter()
+        )
 
         rank_performance = (
             self._analyze_rank_performance(
@@ -1120,9 +1298,21 @@ class MatchAnalysisService:
             )
         )
 
+        timings[
+            "rank_performance"
+        ] = (
+            self._elapsed(
+                started
+            )
+        )
+
         # ==================================================
         # 7. COACHING SIGNALS
         # ==================================================
+
+        started = (
+            time.perf_counter()
+        )
 
         coaching_signals = []
 
@@ -1181,15 +1371,35 @@ class MatchAnalysisService:
             )
         )
 
+        timings[
+            "coaching_signal_generation"
+        ] = (
+            self._elapsed(
+                started
+            )
+        )
+
         # ==================================================
-        # 8. MATCH-SPECIFIC RECOMMENDATIONS
+        # 8. MATCH RECOMMENDATIONS
         # ==================================================
+
+        started = (
+            time.perf_counter()
+        )
 
         recommendations = (
             self.recommendation_engine
             .build_match_recommendations(
                 critical_moments=
                     critical_moments,
+            )
+        )
+
+        timings[
+            "recommendation_engine"
+        ] = (
+            self._elapsed(
+                started
             )
         )
 
@@ -1206,6 +1416,10 @@ class MatchAnalysisService:
         )
 
         loss_context = None
+
+        started = (
+            time.perf_counter()
+        )
 
         if not participant_win:
 
@@ -1228,6 +1442,34 @@ class MatchAnalysisService:
                         positive_moments,
                 )
             )
+
+        timings[
+            "loss_context_analyzer"
+        ] = (
+            self._elapsed(
+                started
+            )
+        )
+
+        # ==================================================
+        # TOTAL
+        # ==================================================
+
+        timings[
+            "TOTAL_MATCH_ANALYSIS"
+        ] = (
+            self._elapsed(
+                analysis_started
+            )
+        )
+
+        # ==================================================
+        # DEBUG OUTPUT
+        # ==================================================
+
+        self._print_timings(
+            timings
+        )
 
         # ==================================================
         # FINAL DIFFTHEORY MATCH ANALYSIS
@@ -1282,11 +1524,6 @@ class MatchAnalysisService:
                 len(
                     contextual_intervals
                 ),
-
-            # We deliberately do NOT return all raw
-            # intervals here because they are large.
-            # They can always be regenerated from
-            # timeline data if needed.
 
             # ======================================
             # FARM

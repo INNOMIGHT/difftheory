@@ -6,3 +6,5 @@ from app.models.match_team import MatchTeam
 from app.models.match_participant import MatchParticipant
 from app.models.timeline_frame import TimelineFrame
 from app.models.timeline_event import TimelineEvent
+from app.models.match_analysis import MatchAnalysis
+from app.models.beta_session import BetaSession

@@ -205,6 +205,60 @@ class RecommendationEngine:
                     ),
             })
 
+        # ----------------------------------
+        # Very bad fight-state combination
+        # ----------------------------------
+
+        bad_state_reasons = {
+            "team_gold_disadvantage",
+            "team_level_disadvantage",
+            "local_number_disadvantage",
+        }
+
+        bad_state_count = len(
+            bad_state_reasons
+            & reasons
+        )
+
+        if bad_state_count >= 2:
+
+            recommendations.append({
+                "category":
+                    "FIGHT_SELECTION",
+
+                "priority":
+                    "HIGH",
+
+                "minute":
+                    minute,
+
+                "title":
+                    "Check the game state "
+                    "before committing",
+
+                "evidence": {
+                    "disadvantages_detected":
+                        sorted(
+                            bad_state_reasons
+                            & reasons
+                        )
+                },
+
+                "recommendation":
+                    (
+                        "Multiple disadvantages "
+                        "were present before this "
+                        "death. Before committing "
+                        "to a fight, quickly check "
+                        "numbers, team levels, "
+                        "gold state and objective "
+                        "timing. When several are "
+                        "unfavorable at once, "
+                        "disengaging is usually "
+                        "the safer decision."
+                    ),
+            })
+
         return recommendations
 
     def build_match_recommendations(

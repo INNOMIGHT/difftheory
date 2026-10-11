@@ -9,6 +9,11 @@ from app.models.match_participant import MatchParticipant
 from app.models.timeline_frame import TimelineFrame
 from app.models.timeline_event import TimelineEvent
 
+from sqlalchemy.orm import (
+    Session,
+    undefer,
+)
+
 
 class AnalyticsRepository:
 
@@ -114,14 +119,23 @@ class AnalyticsRepository:
         )
 
 
-    def get_timeline_events(self, match_ids: list[int]):
+    def get_timeline_events(
+        self,
+        match_ids: list[int],
+    ):
 
         if not match_ids:
             return []
 
         statement = (
-            select(TimelineEvent)
-            .where(TimelineEvent.match_id.in_(match_ids))
+            select(
+                TimelineEvent
+            )
+            .where(
+                TimelineEvent.match_id.in_(
+                    match_ids
+                )
+            )
             .order_by(
                 TimelineEvent.match_id,
                 TimelineEvent.timestamp_ms,
@@ -129,7 +143,10 @@ class AnalyticsRepository:
         )
 
         return (
-            self.db.execute(statement)
+            self.db
+            .execute(
+                statement
+            )
             .scalars()
             .all()
         )

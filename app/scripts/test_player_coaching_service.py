@@ -14,6 +14,11 @@ from app.analysis.player_coaching_service import (
     PlayerCoachingService,
 )
 
+from app.analysis.match_analysis_persistence_service import (
+    MatchAnalysisPersistenceService,
+)
+
+import time
 
 RIOT_ACCOUNT_ID = 1
 
@@ -23,6 +28,9 @@ MATCH_LIMIT = 10
 
 
 def main():
+    script_started = (
+        time.perf_counter()
+    )
 
     db = SessionLocal()
 
@@ -33,9 +41,8 @@ def main():
                 db
             )
         )
-
-        match_analysis_service = (
-            MatchAnalysisService(
+        persistence_service = (
+            MatchAnalysisPersistenceService(
                 db=db
             )
         )
@@ -90,6 +97,8 @@ def main():
         # MATCHES
         # ==================================================
 
+        started = time.perf_counter()
+
         match_results = (
             repository
             .get_player_matches(
@@ -99,6 +108,11 @@ def main():
                 limit=
                     MATCH_LIMIT,
             )
+        )
+
+        print(
+            f"[TIMING] get_player_matches: "
+            f"{time.perf_counter() - started:.3f}s"
         )
 
         if not match_results:
@@ -123,11 +137,19 @@ def main():
         # LOAD ALL TIMELINE DATA ONCE
         # ==================================================
 
+        started = time.perf_counter()
+
         all_frames = (
             repository
             .get_timeline_frames(
                 match_ids
             )
+        )
+
+        print(
+            f"[TIMING] get_timeline_frames: "
+            f"{time.perf_counter() - started:.3f}s "
+            f"({len(all_frames)} rows)"
         )
 
         all_events = (
@@ -235,9 +257,15 @@ def main():
 
                 continue
 
-            analysis = (
-                match_analysis_service
-                .analyze_match(
+            match_started = (
+                time.perf_counter()
+            )
+            result = (
+                persistence_service
+                .get_or_analyze(
+                    riot_account_id=
+                        riot_account.id,
+
                     match=
                         match,
 
@@ -263,6 +291,16 @@ def main():
                         participant.role,
                 )
             )
+            match_elapsed = (
+                time.perf_counter()
+                - match_started
+            )
+
+            analysis = (
+                result[
+                    "analysis"
+                ]
+            )
 
             analyses.append(
                 analysis
@@ -274,18 +312,29 @@ def main():
                 f"{participant.champion_name} | "
                 f"{participant.role} | "
                 f"{'WIN' if participant.win else 'LOSS'} | "
-                f"{len(analysis.get('coaching_signals', []))} signals"
+                f"{len(analysis.get('coaching_signals', []))} signals | "
+                f"{result['source']} | "
+                f"{match_elapsed:.3f}s"
             )
 
         # ==================================================
         # PLAYER COACHING
         # ==================================================
 
+        started = (
+            time.perf_counter()
+        )
+
         coaching = (
             player_coaching_service
             .build(
                 analyses
             )
+        )
+
+        print(
+            f"[TIMING] PlayerCoachingService.build: "
+            f"{time.perf_counter() - started:.3f}s"
         )
 
         print()
@@ -803,6 +852,11 @@ def main():
                     f"highest score "
                     f"{summary['highest_score']}"
                 )
+        print()
+        print(
+            f"[TIMING] TOTAL SCRIPT: "
+            f"{time.perf_counter() - script_started:.3f}s"
+        )
 
     finally:
 
