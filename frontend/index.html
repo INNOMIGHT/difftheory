@@ -5,6 +5,48 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DiffTheory — Beyond The Stats</title>  
+    <script>
+    (
+        function (
+            location
+        ) {
+
+            if (
+                location.search.startsWith(
+                    "?/",
+                )
+            ) {
+
+                const decoded =
+                    location.search
+                        .slice(2)
+                        .split("&")
+                        .map(
+                            function (
+                                value
+                            ) {
+                                return value.replace(
+                                    /~and~/g,
+                                    "&",
+                                );
+                            }
+                        )
+                        .join("?");
+
+                window.history.replaceState(
+                    null,
+                    "",
+                    location.pathname
+                    + decoded
+                    + location.hash
+                );
+            }
+
+        }(
+            window.location
+        )
+    );
+</script>
   </head>
   <body>
     <div id="root"></div>

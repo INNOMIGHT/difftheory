@@ -15,6 +15,7 @@ import type {
 } from "react";
 
 import {
+    Link,
     Navigate,
     useNavigate,
 } from "react-router-dom";
@@ -457,6 +458,69 @@ export default function ConnectPage() {
                 </div>
 
             </section>
+
+            <footer className="connect-footer">
+
+    <div className="connect-footer-brand">
+
+        <span>
+            AN
+        </span>
+
+        <strong>
+            INNOMIGHT
+        </strong>
+
+        <span>
+            PRODUCT
+        </span>
+
+    </div>
+
+
+    <div className="connect-footer-links">
+
+        <Link
+            to="/privacy"
+        >
+            Privacy Policy
+        </Link>
+
+        <span>
+            •
+        </span>
+
+        <Link
+            to="/terms"
+        >
+            Terms of Service
+        </Link>
+
+        <span>
+            •
+        </span>
+
+        <a
+            href="https://innomight.com"
+            target="_blank"
+            rel="noreferrer"
+        >
+            Innomight
+        </a>
+
+    </div>
+
+
+    <p className="connect-footer-riot">
+        DiffTheory isn't endorsed by Riot Games and
+        doesn't reflect the views or opinions of Riot
+        Games or anyone officially involved in producing
+        or managing Riot Games properties. Riot Games,
+        and all associated properties are trademarks or
+        registered trademarks of Riot Games, Inc.
+    </p>
+
+</footer>
 
         </main>
     );
