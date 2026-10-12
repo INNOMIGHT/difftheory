@@ -641,3 +641,169 @@
     align-items: center;
     gap: 7px;
 }
+
+.app-footer {
+    margin-top: 64px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    background:
+        linear-gradient(
+            180deg,
+            rgba(15, 20, 27, 0.75),
+            rgba(8, 11, 16, 0.96)
+        );
+}
+
+.footer-main {
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 34px 38px 26px;
+
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 32px;
+}
+
+.footer-brand-block {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.footer-product-label {
+    margin-bottom: 8px;
+
+    color: #ff7818;
+
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.22em;
+}
+
+.footer-brand {
+    font-size: 19px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+}
+
+.footer-brand span {
+    color: #ff7818;
+}
+
+.footer-tagline {
+    margin: 5px 0 0;
+
+    color: rgba(255, 255, 255, 0.46);
+
+    font-size: 11px;
+    letter-spacing: 0.08em;
+}
+
+.footer-links {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 22px;
+}
+
+.footer-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+
+    color: rgba(255, 255, 255, 0.62);
+
+    font-size: 11px;
+    font-weight: 700;
+
+    text-decoration: none;
+
+    transition:
+        color 0.18s ease;
+}
+
+.footer-links a:hover {
+    color: #ff7818;
+}
+
+.footer-legal {
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.footer-riot-notice {
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 19px 38px 14px;
+
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+
+    color: rgba(255, 255, 255, 0.38);
+}
+
+.footer-riot-notice svg {
+    flex: 0 0 auto;
+    margin-top: 2px;
+
+    color: rgba(255, 120, 24, 0.62);
+}
+
+.footer-riot-notice p {
+    margin: 0;
+
+    max-width: 1050px;
+
+    font-size: 9px;
+    line-height: 1.6;
+}
+
+.footer-bottom {
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 0 38px 22px;
+
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 9px;
+
+    color: rgba(255, 255, 255, 0.3);
+
+    font-size: 9px;
+    line-height: 1.55;
+}
+
+.footer-dot {
+    opacity: 0.4;
+}
+
+
+@media (max-width: 760px) {
+
+    .footer-main {
+        align-items: flex-start;
+        flex-direction: column;
+        padding:
+            28px 22px 22px;
+    }
+
+    .footer-links {
+        gap:
+            12px 18px;
+    }
+
+    .footer-riot-notice {
+        padding:
+            18px 22px 12px;
+    }
+
+    .footer-bottom {
+        padding:
+            0 22px 22px;
+    }
+
+    .footer-bottom .footer-dot {
+        display: none;
+    }
+}

@@ -29,6 +29,12 @@ import RanksPage
 import ConnectPage
     from "./pages/ConnectPage";
 
+import PrivacyPage
+    from "./pages/PrivacyPage";
+
+import TermsPage
+    from "./pages/TermsPage";
+
 
 export default function App() {
 
@@ -128,6 +134,19 @@ export default function App() {
 
                 </Route>
 
+                <Route
+                    path="/privacy"
+                    element={
+                        <PrivacyPage />
+                    }
+                />
+
+                <Route
+                    path="/terms"
+                    element={
+                        <TermsPage />
+                    }
+                />
 
                 <Route
                     path="*"

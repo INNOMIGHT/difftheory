@@ -3,7 +3,7 @@ export default function RanksPage() {
         <div>
             <h1>Rank Metrics</h1>
             <p style={{ color: "var(--text-secondary)" }}>
-                Gold through Diamond benchmark exploration comes next.
+                Rank metrics and peer comparison coming soon. 
             </p>
         </div>
     );
