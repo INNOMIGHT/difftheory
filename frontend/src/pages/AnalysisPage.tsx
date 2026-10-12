@@ -20,7 +20,6 @@ import {
     Target,
     TrendingDown,
     TrendingUp,
-    Trophy,
     Wheat,
     Zap,
 } from "lucide-react";
