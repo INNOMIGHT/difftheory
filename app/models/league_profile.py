@@ -1,7 +1,16 @@
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import (
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+)
+from sqlalchemy.orm import (
+    Mapped,
+    mapped_column,
+    relationship,
+)
 
 from app.database.database import Base
 
@@ -15,7 +24,10 @@ class LeagueProfile(Base):
     )
 
     riot_account_id: Mapped[int] = mapped_column(
-        ForeignKey("riot_accounts.id", ondelete="CASCADE"),
+        ForeignKey(
+            "riot_accounts.id",
+            ondelete="CASCADE",
+        ),
         nullable=False,
         unique=True,
         index=True,
@@ -37,6 +49,35 @@ class LeagueProfile(Base):
     )
 
     profile_icon_id: Mapped[int | None] = mapped_column(
+        Integer,
+        nullable=True,
+    )
+
+    # ==================================================
+    # RANKED SOLO / DUO
+    # ==================================================
+
+    tier: Mapped[str | None] = mapped_column(
+        String(20),
+        nullable=True,
+    )
+
+    rank_division: Mapped[str | None] = mapped_column(
+        String(10),
+        nullable=True,
+    )
+
+    league_points: Mapped[int | None] = mapped_column(
+        Integer,
+        nullable=True,
+    )
+
+    ranked_wins: Mapped[int | None] = mapped_column(
+        Integer,
+        nullable=True,
+    )
+
+    ranked_losses: Mapped[int | None] = mapped_column(
         Integer,
         nullable=True,
     )

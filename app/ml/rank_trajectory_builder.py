@@ -15,18 +15,27 @@ OUTPUT_DIR = Path(
 class RankTrajectoryBuilder:
 
     RANKS = [
+        "IRON",
+        "BRONZE",
+        "SILVER",
         "GOLD",
         "PLATINUM",
         "EMERALD",
         "DIAMOND",
+        "MASTER",
+        "GRANDMASTER",
+        "CHALLENGER",
     ]
 
+
     RANK_ORDER = {
-        "GOLD": 0,
-        "PLATINUM": 1,
-        "EMERALD": 2,
-        "DIAMOND": 3,
+        rank: index
+        for index, rank
+        in enumerate(
+            RANKS
+        )
     }
+
 
     def _load_rank(
         self,
@@ -38,17 +47,22 @@ class RankTrajectoryBuilder:
             / f"{rank}_role_statistics.csv"
         )
 
+
         if not path.exists():
 
             raise FileNotFoundError(
                 f"Missing statistics file: {path}"
             )
 
+
         df = pd.read_csv(
             path
         )
 
-        df["rank"] = rank
+
+        df["rank"] = (
+            rank
+        )
 
         df["rank_order"] = (
             self.RANK_ORDER[
@@ -56,7 +70,9 @@ class RankTrajectoryBuilder:
             ]
         )
 
+
         return df
+
 
     @staticmethod
     def _direction_changes(
@@ -67,24 +83,29 @@ class RankTrajectoryBuilder:
 
         previous_direction = None
 
-        for i in range(
+
+        for index in range(
             1,
             len(values),
         ):
 
             difference = (
-                values[i]
-                - values[i - 1]
+                values[index]
+                -
+                values[index - 1]
             )
+
 
             if difference == 0:
                 continue
+
 
             direction = (
                 1
                 if difference > 0
                 else -1
             )
+
 
             if (
                 previous_direction
@@ -96,11 +117,14 @@ class RankTrajectoryBuilder:
 
                 changes += 1
 
+
             previous_direction = (
                 direction
             )
 
+
         return changes
+
 
     @staticmethod
     def _monotonicity_score(
@@ -110,39 +134,51 @@ class RankTrajectoryBuilder:
         if len(values) < 2:
             return 0.0
 
+
         increasing = 0
+
         decreasing = 0
+
 
         total_steps = (
             len(values)
             - 1
         )
 
-        for i in range(
+
+        for index in range(
             1,
             len(values),
         ):
 
-            diff = (
-                values[i]
-                - values[i - 1]
+            difference = (
+                values[index]
+                -
+                values[index - 1]
             )
 
-            if diff > 0:
+
+            if difference > 0:
+
                 increasing += 1
 
-            elif diff < 0:
+            elif difference < 0:
+
                 decreasing += 1
+
 
         strongest_direction = max(
             increasing,
             decreasing,
         )
 
+
         return (
             strongest_direction
-            / total_steps
+            /
+            total_steps
         )
+
 
     @staticmethod
     def _trend_direction(
@@ -158,6 +194,7 @@ class RankTrajectoryBuilder:
 
         return "FLAT"
 
+
     @staticmethod
     def _minimum_confidence(
         confidences,
@@ -170,11 +207,13 @@ class RankTrajectoryBuilder:
             "HIGH": 3,
         }
 
+
         reverse = {
             value: key
             for key, value
             in order.items()
         }
+
 
         minimum = min(
             order.get(
@@ -185,15 +224,18 @@ class RankTrajectoryBuilder:
             in confidences
         )
 
+
         return reverse[
             minimum
         ]
+
 
     def build(
         self,
     ):
 
         frames = []
+
 
         for rank in self.RANKS:
 
@@ -203,12 +245,15 @@ class RankTrajectoryBuilder:
                 )
             )
 
+
         all_stats = pd.concat(
             frames,
             ignore_index=True,
         )
 
+
         rows = []
+
 
         grouped = (
             all_stats
@@ -220,10 +265,12 @@ class RankTrajectoryBuilder:
             )
         )
 
+
         for (
             role,
             metric,
         ), group in grouped:
+
 
             group = (
                 group
@@ -232,6 +279,9 @@ class RankTrajectoryBuilder:
                 )
             )
 
+
+            # We want a genuine complete-ladder
+            # trajectory.
             if (
                 len(group)
                 != len(
@@ -239,6 +289,7 @@ class RankTrajectoryBuilder:
                 )
             ):
                 continue
+
 
             medians = (
                 group[
@@ -248,12 +299,14 @@ class RankTrajectoryBuilder:
                 .tolist()
             )
 
+
             confidences = (
                 group[
                     "confidence"
                 ]
                 .tolist()
             )
+
 
             sample_counts = (
                 group[
@@ -263,6 +316,7 @@ class RankTrajectoryBuilder:
                 .tolist()
             )
 
+
             first_value = (
                 medians[0]
             )
@@ -271,20 +325,27 @@ class RankTrajectoryBuilder:
                 medians[-1]
             )
 
+
             absolute_change = (
                 last_value
-                - first_value
+                -
+                first_value
             )
 
+
             percent_change = None
+
 
             if first_value != 0:
 
                 percent_change = (
                     absolute_change
-                    / first_value
-                    * 100
+                    /
+                    first_value
+                    *
+                    100
                 )
+
 
             monotonicity = (
                 self._monotonicity_score(
@@ -292,42 +353,20 @@ class RankTrajectoryBuilder:
                 )
             )
 
+
             direction_changes = (
                 self._direction_changes(
                     medians
                 )
             )
 
-            rows.append({
+
+            row = {
                 "role":
                     role,
 
                 "metric":
                     metric,
-
-                "gold_p50":
-                    medians[0],
-
-                "platinum_p50":
-                    medians[1],
-
-                "emerald_p50":
-                    medians[2],
-
-                "diamond_p50":
-                    medians[3],
-
-                "gold_n":
-                    sample_counts[0],
-
-                "platinum_n":
-                    sample_counts[1],
-
-                "emerald_n":
-                    sample_counts[2],
-
-                "diamond_n":
-                    sample_counts[3],
 
                 "overall_direction":
                     self._trend_direction(
@@ -351,11 +390,52 @@ class RankTrajectoryBuilder:
                     self._minimum_confidence(
                         confidences
                     ),
-            })
+            }
+
+
+            # ======================================
+            # DYNAMIC RANK COLUMNS
+            # ======================================
+
+            for (
+                index,
+                rank,
+            ) in enumerate(
+                self.RANKS
+            ):
+
+                rank_key = (
+                    rank.lower()
+                )
+
+
+                row[
+                    f"{rank_key}_p50"
+                ] = (
+                    medians[
+                        index
+                    ]
+                )
+
+
+                row[
+                    f"{rank_key}_n"
+                ] = (
+                    sample_counts[
+                        index
+                    ]
+                )
+
+
+            rows.append(
+                row
+            )
+
 
         result = pd.DataFrame(
             rows
         )
+
 
         if not result.empty:
 
@@ -372,6 +452,7 @@ class RankTrajectoryBuilder:
                 ]
             )
 
+
             result = (
                 result
                 .sort_values(
@@ -386,35 +467,43 @@ class RankTrajectoryBuilder:
                 )
             )
 
+
         OUTPUT_DIR.mkdir(
             parents=True,
             exist_ok=True,
         )
 
+
         output_path = (
             OUTPUT_DIR
-            / "GOLD_to_DIAMOND_trajectories.csv"
+            /
+            "IRON_to_CHALLENGER_trajectories.csv"
         )
+
 
         result.to_csv(
             output_path,
             index=False,
         )
 
+
         print()
+
         print(
-            "GOLD -> DIAMOND "
+            "IRON -> CHALLENGER "
             "RANK TRAJECTORIES"
         )
 
         print(
-            "=" * 55
+            "=" * 60
         )
+
 
         print(
             f"Trajectory rows: "
             f"{len(result)}"
         )
+
 
         if not result.empty:
 
@@ -428,41 +517,60 @@ class RankTrajectoryBuilder:
                 "kda",
             }
 
-            preview = result[
+
+            preview = (
                 result[
-                    "metric"
-                ].isin(
-                    interesting
-                )
+                    result[
+                        "metric"
+                    ]
+                    .isin(
+                        interesting
+                    )
+                ]
+            )
+
+
+            display_columns = [
+                "role",
+                "metric",
             ]
 
+
+            for rank in self.RANKS:
+
+                display_columns.append(
+                    f"{rank.lower()}_p50"
+                )
+
+
+            display_columns.extend(
+                [
+                    "percent_change",
+                    "monotonicity_score",
+                    "direction_changes",
+                    "trajectory_confidence",
+                ]
+            )
+
+
             print()
+
             print(
                 preview[
-                    [
-                        "role",
-                        "metric",
-
-                        "gold_p50",
-                        "platinum_p50",
-                        "emerald_p50",
-                        "diamond_p50",
-
-                        "percent_change",
-                        "monotonicity_score",
-                        "direction_changes",
-
-                        "trajectory_confidence",
-                    ]
+                    display_columns
                 ]
                 .to_string(
                     index=False
                 )
             )
 
+
         print()
+
         print(
-            f"Saved: {output_path}"
+            f"Saved: "
+            f"{output_path}"
         )
+
 
         return result

@@ -503,6 +503,32 @@ class RiotClient:
 
         return response.json()
 
+
+    def get_ranked_entries_by_puuid(
+        self,
+        puuid: str,
+        platform: str,
+    ) -> list[dict]:
+
+        platform = (
+            platform.lower()
+        )
+
+        url = (
+            f"https://{platform}.api.riotgames.com"
+            "/lol/league/v4/"
+            f"entries/by-puuid/{puuid}"
+        )
+
+        response = (
+            self._request(
+                "GET",
+                url,
+            )
+        )
+
+        return response.json()
+
     # ==================================================
     # LEAGUE-V4
     #

@@ -1,3 +1,5 @@
+import argparse
+
 from pathlib import Path
 
 import pandas as pd
@@ -31,13 +33,11 @@ PLATFORM = "EUW1"
 
 REGION = "EUROPE"
 
-TIER = "DIAMOND"
+DEFAULT_TARGET_PLAYERS = 60
 
-TARGET_PLAYERS = 60
+DEFAULT_MATCHES_PER_PLAYER = 5
 
-MATCHES_PER_PLAYER = 5
-
-TARGET_MATCHES = 200
+DEFAULT_TARGET_MATCHES = 200
 
 
 # ==================================================
@@ -48,17 +48,92 @@ OUTPUT_DIR = Path(
     "artifacts/rank_baseline"
 )
 
-OUTPUT_PATH = (
-    OUTPUT_DIR
-    / f"{TIER}_rank_sample_index.csv"
-)
+
+VALID_TIERS = {
+    "IRON",
+    "BRONZE",
+    "SILVER",
+    "GOLD",
+    "PLATINUM",
+    "EMERALD",
+    "DIAMOND",
+    "MASTER",
+    "GRANDMASTER",
+    "CHALLENGER",
+}
+
+
+def parse_args():
+
+    parser = argparse.ArgumentParser(
+        description=(
+            "Collect DiffTheory ranked "
+            "baseline match samples."
+        )
+    )
+
+    parser.add_argument(
+        "--tier",
+        required=True,
+        type=str,
+    )
+
+    parser.add_argument(
+        "--target-players",
+        type=int,
+        default=(
+            DEFAULT_TARGET_PLAYERS
+        ),
+    )
+
+    parser.add_argument(
+        "--matches-per-player",
+        type=int,
+        default=(
+            DEFAULT_MATCHES_PER_PLAYER
+        ),
+    )
+
+    parser.add_argument(
+        "--target-matches",
+        type=int,
+        default=(
+            DEFAULT_TARGET_MATCHES
+        ),
+    )
+
+    return parser.parse_args()
 
 
 def main():
 
+    args = parse_args()
+
+
+    tier = (
+        args.tier
+        .strip()
+        .upper()
+    )
+
+
+    if tier not in VALID_TIERS:
+
+        raise ValueError(
+            f"Unsupported tier: {tier}"
+        )
+
+
+    output_path = (
+        OUTPUT_DIR
+        / f"{tier}_rank_sample_index.csv"
+    )
+
+
     db = SessionLocal()
 
     riot_client = RiotClient()
+
 
     try:
 
@@ -80,8 +155,7 @@ def main():
 
         collector = (
             RankBaselineCollectionService(
-                db=
-                    db,
+                db=db,
 
                 riot_client=
                     riot_client,
@@ -91,6 +165,7 @@ def main():
             )
         )
 
+
         # ==========================================
         # SAMPLE RANKED PLAYERS
         # ==========================================
@@ -99,26 +174,14 @@ def main():
 
         print(
             f"Finding "
-            f"{TIER} players..."
+            f"{tier} players..."
         )
 
+
         if (
-            TIER
-            == "MASTER_PLUS"
+            tier
+            in sample_service.STANDARD_TIERS
         ):
-
-            players = (
-                sample_service
-                .collect_master_plus_players(
-                    platform=
-                        PLATFORM,
-
-                    target_players=
-                        TARGET_PLAYERS,
-                )
-            )
-
-        else:
 
             players = (
                 sample_service
@@ -127,25 +190,43 @@ def main():
                         PLATFORM,
 
                     tier=
-                        TIER,
+                        tier,
 
                     target_players=
-                        TARGET_PLAYERS,
+                        args.target_players,
                 )
             )
+
+        else:
+
+            players = (
+                sample_service
+                .collect_elite_tier_players(
+                    platform=
+                        PLATFORM,
+
+                    tier=
+                        tier,
+
+                    target_players=
+                        args.target_players,
+                )
+            )
+
 
         print(
             f"Ranked players found: "
             f"{len(players)}"
         )
 
+
         if not players:
 
             raise RuntimeError(
                 f"No ranked players "
-                f"found for "
-                f"{TIER}."
+                f"found for {tier}."
             )
+
 
         # ==========================================
         # COLLECT MATCHES
@@ -158,11 +239,11 @@ def main():
             "ranked matches..."
         )
 
+
         result = (
             collector
             .collect_for_players(
-                players=
-                    players,
+                players=players,
 
                 region=
                     REGION,
@@ -171,18 +252,20 @@ def main():
                     PLATFORM,
 
                 matches_per_player=
-                    MATCHES_PER_PLAYER,
+                    args.matches_per_player,
 
                 target_unique_matches=
-                    TARGET_MATCHES,
+                    args.target_matches,
             )
         )
+
 
         rows = (
             result[
                 "rows"
             ]
         )
+
 
         # ==========================================
         # SAVE INDEX
@@ -193,14 +276,17 @@ def main():
             exist_ok=True,
         )
 
+
         df = pd.DataFrame(
             rows
         )
 
+
         df.to_csv(
-            OUTPUT_PATH,
+            output_path,
             index=False,
         )
+
 
         # ==========================================
         # REPORT
@@ -209,13 +295,14 @@ def main():
         print()
 
         print(
-            f"{TIER} "
+            f"{tier} "
             f"BASELINE COLLECTION"
         )
 
         print(
-            "=" * 32
+            "=" * 40
         )
+
 
         print(
             f"Players sampled: "
@@ -257,6 +344,7 @@ def main():
             f"{result['failed_matches']}"
         )
 
+
         # ==========================================
         # DISTRIBUTIONS
         # ==========================================
@@ -282,6 +370,7 @@ def main():
                 )
             )
 
+
         if (
             not df.empty
             and
@@ -289,19 +378,28 @@ def main():
             in df.columns
         ):
 
-            print()
-
-            print(
-                "DIVISION COUNTS"
-            )
-
-            print(
+            division_counts = (
                 df[
                     "division"
-                ].value_counts(
-                    dropna=False
-                )
+                ]
+                .dropna()
             )
+
+            if not division_counts.empty:
+
+                print()
+
+                print(
+                    "DIVISION COUNTS"
+                )
+
+                print(
+                    division_counts
+                    .value_counts(
+                        dropna=False
+                    )
+                )
+
 
         if (
             not df.empty
@@ -319,17 +417,20 @@ def main():
             print(
                 df[
                     "match_platform"
-                ].value_counts(
+                ]
+                .value_counts(
                     dropna=False
                 )
             )
+
 
         print()
 
         print(
             f"Saved: "
-            f"{OUTPUT_PATH}"
+            f"{output_path}"
         )
+
 
     finally:
 

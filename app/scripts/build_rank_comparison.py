@@ -1,23 +1,56 @@
+import argparse
+
 from app.ml.rank_comparison_builder import (
     RankComparisonBuilder,
 )
 
-LOWER_RANK = "EMERALD"
-HIGHER_RANK = "DIAMOND"
+
+def parse_args():
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "--lower",
+        required=True,
+    )
+
+    parser.add_argument(
+        "--higher",
+        required=True,
+    )
+
+    return parser.parse_args()
 
 
 def main():
+
+    args = parse_args()
+
+
+    lower_rank = (
+        args.lower
+        .strip()
+        .upper()
+    )
+
+    higher_rank = (
+        args.higher
+        .strip()
+        .upper()
+    )
+
 
     builder = (
         RankComparisonBuilder()
     )
 
+
     builder.build(
         lower_rank=
-            LOWER_RANK,
+            lower_rank,
 
         higher_rank=
-            HIGHER_RANK,
+            higher_rank,
     )
 
 

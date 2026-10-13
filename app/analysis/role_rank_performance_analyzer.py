@@ -9,17 +9,23 @@ STATISTICS_DIR = Path(
 
 TRAJECTORY_PATH = Path(
     "artifacts/rank_baseline/trajectories/"
-    "GOLD_to_DIAMOND_trajectories.csv"
+    "IRON_to_CHALLENGER_trajectories.csv"
 )
 
 
 class RoleRankPerformanceAnalyzer:
 
     RANKS = [
+        "IRON",
+        "BRONZE",
+        "SILVER",
         "GOLD",
         "PLATINUM",
         "EMERALD",
         "DIAMOND",
+        "MASTER",
+        "GRANDMASTER",
+        "CHALLENGER",
     ]
 
     RANK_INDEX = {
@@ -477,11 +483,6 @@ class RoleRankPerformanceAnalyzer:
         if trajectory is None:
             return "UNKNOWN"
 
-        confidence = (
-            trajectory[
-                "trajectory_confidence"
-            ]
-        )
 
         monotonicity = float(
             trajectory[
@@ -489,25 +490,116 @@ class RoleRankPerformanceAnalyzer:
             ]
         )
 
-        if (
-            confidence
-            == "VERY_LOW"
-        ):
-            return "VERY_LOW"
+
+        direction_changes = int(
+            trajectory[
+                "direction_changes"
+            ]
+        )
+
+
+        # ==========================================
+        # STRONG
+        #
+        # Clear rank progression across most of
+        # the ladder with very little reversal.
+        # ==========================================
 
         if (
-            monotonicity
-            >= 0.99
+            monotonicity >= 0.80
+            and
+            direction_changes <= 2
         ):
+
             return "STRONG"
 
+
+        # ==========================================
+        # MODERATE
+        #
+        # General ladder trend exists but contains
+        # some rank-to-rank noise.
+        # ==========================================
+
         if (
-            monotonicity
-            >= 0.66
+            monotonicity >= 0.70
+            and
+            direction_changes <= 3
         ):
+
             return "MODERATE"
 
+
         return "WEAK"
+
+
+
+    @staticmethod
+    def _local_comparison_confidence(
+        *,
+        current_baseline,
+        next_baseline,
+    ):
+
+        confidence_order = {
+            "VERY_LOW": 0,
+            "LOW": 1,
+            "MEDIUM": 2,
+            "HIGH": 3,
+        }
+
+        reverse_order = {
+            value: key
+            for key, value
+            in confidence_order.items()
+        }
+
+
+        confidences = []
+
+
+        if current_baseline is not None:
+
+            confidences.append(
+                str(
+                    current_baseline[
+                        "confidence"
+                    ]
+                )
+            )
+
+
+        if next_baseline is not None:
+
+            confidences.append(
+                str(
+                    next_baseline[
+                        "confidence"
+                    ]
+                )
+            )
+
+
+        if not confidences:
+
+            return "VERY_LOW"
+
+
+        minimum = min(
+            confidence_order.get(
+                confidence,
+                0,
+            )
+            for confidence
+            in confidences
+        )
+
+
+        return reverse_order[
+            minimum
+        ]
+
+
 
     def _trajectory_alignment(
         self,
@@ -586,16 +678,27 @@ class RoleRankPerformanceAnalyzer:
         *,
         metric,
         trajectory,
+        comparison_confidence,
     ):
+
         """
-        Conservative measure for whether a metric
+        Conservative estimate of whether a metric
         should influence rank-development coaching.
+
+        Overall trajectory describes whether the
+        metric tends to change across the ladder.
+
+        comparison_confidence describes whether
+        the player's current -> next rank comparison
+        has enough local evidence.
 
         This is NOT causal importance.
         """
 
         if trajectory is None:
+
             return "UNKNOWN"
+
 
         reliability = (
             self._trajectory_reliability(
@@ -603,59 +706,78 @@ class RoleRankPerformanceAnalyzer:
             )
         )
 
+
         alignment = (
             self._trajectory_alignment(
-                metric=
-                    metric,
-
-                trajectory=
-                    trajectory,
+                metric=metric,
+                trajectory=trajectory,
             )
         )
 
-        confidence = (
-            trajectory[
-                "trajectory_confidence"
-            ]
-        )
+
+        # ==========================================
+        # LOCAL DATA QUALITY
+        # ==========================================
 
         if (
-            confidence
+            comparison_confidence
             == "VERY_LOW"
         ):
+
             return "INSUFFICIENT_DATA"
+
+
+        # ==========================================
+        # DIRECTION
+        # ==========================================
 
         if (
             alignment
             == "OPPOSED"
         ):
+
             return "NOT_SUPPORTED"
+
 
         if (
             alignment
             == "FLAT"
         ):
+
             return "WEAK"
+
 
         if (
             alignment
             != "ALIGNED"
         ):
+
             return "UNKNOWN"
+
+
+        # ==========================================
+        # STRENGTH OF TRAJECTORY
+        # ==========================================
 
         if (
             reliability
             == "STRONG"
         ):
+
             return "STRONG"
+
 
         if (
             reliability
             == "MODERATE"
         ):
+
             return "MODERATE"
 
+
         return "WEAK"
+
+
 
     # ==================================================
     # STATUS
@@ -763,12 +885,12 @@ class RoleRankPerformanceAnalyzer:
         )
 
         next_rank_percentile = None
-
         next_rank_confidence = None
-
         next_rank_sample_count = None
-
         next_status = None
+
+        next_baseline = None
+
 
         if (
             next_rank
@@ -824,6 +946,16 @@ class RoleRankPerformanceAnalyzer:
                     )
                 )
 
+
+                comparison_confidence = (
+                    self._local_comparison_confidence(
+                        current_baseline=
+                            current_baseline,
+
+                        next_baseline=
+                            next_baseline,
+                    )
+                )
         # ==========================================
         # TRAJECTORY
         # ==========================================
@@ -861,6 +993,9 @@ class RoleRankPerformanceAnalyzer:
 
                 trajectory=
                     trajectory,
+
+                comparison_confidence=
+                    comparison_confidence,
             )
         )
 
@@ -951,6 +1086,9 @@ class RoleRankPerformanceAnalyzer:
             "next_rank_confidence":
                 next_rank_confidence,
 
+            "comparison_confidence":
+                comparison_confidence,
+
             "next_rank_sample_count":
                 next_rank_sample_count,
 
@@ -979,36 +1117,47 @@ class RoleRankPerformanceAnalyzer:
                 ]
             )
 
+
+            trajectory_values = {}
+
+
+            for trajectory_rank in self.RANKS:
+
+                column = (
+                    f"{trajectory_rank.lower()}_p50"
+                )
+
+
+                value = (
+                    trajectory.get(
+                        column
+                    )
+                )
+
+
+                trajectory_values[
+                    trajectory_rank.lower()
+                ] = (
+                    float(
+                        value
+                    )
+                    if (
+                        value is not None
+                        and
+                        not pd.isna(
+                            value
+                        )
+                    )
+                    else None
+                )
+
+
             result[
                 "trajectory"
             ] = {
-                "gold":
-                    float(
-                        trajectory[
-                            "gold_p50"
-                        ]
-                    ),
 
-                "platinum":
-                    float(
-                        trajectory[
-                            "platinum_p50"
-                        ]
-                    ),
-
-                "emerald":
-                    float(
-                        trajectory[
-                            "emerald_p50"
-                        ]
-                    ),
-
-                "diamond":
-                    float(
-                        trajectory[
-                            "diamond_p50"
-                        ]
-                    ),
+                "ranks":
+                    trajectory_values,
 
                 "overall_direction":
                     trajectory[
@@ -1032,7 +1181,7 @@ class RoleRankPerformanceAnalyzer:
                         ]
                     ),
 
-                "gold_to_diamond_change_pct":
+                "iron_to_challenger_change_pct":
                     (
                         round(
                             float(

@@ -896,13 +896,18 @@ class MatchAnalysisService:
         if (
             rank
             not in {
+                "IRON",
+                "BRONZE",
+                "SILVER",
                 "GOLD",
                 "PLATINUM",
                 "EMERALD",
                 "DIAMOND",
+                "MASTER",
+                "GRANDMASTER",
+                "CHALLENGER",
             }
         ):
-
             return None
 
         features = (

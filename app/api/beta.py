@@ -139,6 +139,7 @@ def start_beta_session(
             },
 
             "league_profile": {
+
                 "platform":
                     league_profile.platform,
 
@@ -150,6 +151,21 @@ def start_beta_session(
 
                 "profile_icon_id":
                     league_profile.profile_icon_id,
+
+                "tier":
+                    league_profile.tier,
+
+                "rank_division":
+                    league_profile.rank_division,
+
+                "league_points":
+                    league_profile.league_points,
+
+                "ranked_wins":
+                    league_profile.ranked_wins,
+
+                "ranked_losses":
+                    league_profile.ranked_losses,
             },
         }
 
@@ -238,6 +254,21 @@ def get_me(
 
                     "profile_icon_id":
                         league_profile.profile_icon_id,
+
+                    "tier":
+                        league_profile.tier,
+
+                    "rank_division":
+                        league_profile.rank_division,
+
+                    "league_points":
+                        league_profile.league_points,
+
+                    "ranked_wins":
+                        league_profile.ranked_wins,
+
+                    "ranked_losses":
+                        league_profile.ranked_losses,
                 }
 
                 if league_profile

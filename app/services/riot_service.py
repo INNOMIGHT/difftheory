@@ -11,6 +11,7 @@ from app.repositories.league_profile_repository import (
 )
 from app.riot.client import RiotClient
 
+from datetime import datetime
 
 class RiotService:
 
@@ -180,24 +181,114 @@ class RiotService:
         )
 
         if not riot_account:
+
             raise ValueError(
                 "Riot account not found."
             )
 
+
+        # ==================================================
+        # FETCH RIOT PROFILE + RANKED SOLO / DUO
+        # ==================================================
+
         with RiotClient() as riot:
 
-            league_data = (
+            summoner_data = (
                 riot.get_summoner_by_puuid(
-                    puuid=riot_account.puuid,
+                    puuid=(
+                        riot_account.puuid
+                    ),
                     platform=platform,
                 )
             )
+
+            ranked_entries = (
+                riot.get_ranked_entries_by_puuid(
+                    puuid=(
+                        riot_account.puuid
+                    ),
+                    platform=platform,
+                )
+            )
+
+
+        # ==================================================
+        # REGION
+        # ==================================================
 
         region = (
             self.get_region_from_platform(
                 platform
             )
         )
+
+
+        # ==================================================
+        # SOLO / DUO ENTRY
+        # ==================================================
+
+        solo_entry = next(
+            (
+                entry
+                for entry in (
+                    ranked_entries
+                    or []
+                )
+                if (
+                    entry.get(
+                        "queueType"
+                    )
+                    == "RANKED_SOLO_5x5"
+                )
+            ),
+            None,
+        )
+
+
+        tier = (
+            solo_entry.get(
+                "tier"
+            )
+            if solo_entry
+            else None
+        )
+
+        rank_division = (
+            solo_entry.get(
+                "rank"
+            )
+            if solo_entry
+            else None
+        )
+
+        league_points = (
+            solo_entry.get(
+                "leaguePoints"
+            )
+            if solo_entry
+            else None
+        )
+
+        ranked_wins = (
+            solo_entry.get(
+                "wins"
+            )
+            if solo_entry
+            else None
+        )
+
+        ranked_losses = (
+            solo_entry.get(
+                "losses"
+            )
+            if solo_entry
+            else None
+        )
+
+
+        # ==================================================
+        # EXISTING PROFILE
+        # ==================================================
 
         existing_profile = (
             self.league_profile_repository
@@ -206,26 +297,13 @@ class RiotService:
             )
         )
 
+
         if existing_profile:
 
             profile = (
-                self.league_profile_repository
-                .update(
-                    profile=existing_profile,
-                    summoner_level=(
-                        league_data.get(
-                            "summonerLevel"
-                        )
-                    ),
-                    profile_icon_id=(
-                        league_data.get(
-                            "profileIconId"
-                        )
-                    ),
-                )
+                existing_profile
             )
 
-            # Keep these correct too.
             profile.platform = (
                 platform
             )
@@ -233,6 +311,47 @@ class RiotService:
             profile.region = (
                 region
             )
+
+            profile.summoner_level = (
+                summoner_data.get(
+                    "summonerLevel"
+                )
+            )
+
+            profile.profile_icon_id = (
+                summoner_data.get(
+                    "profileIconId"
+                )
+            )
+
+            profile.tier = (
+                tier
+            )
+
+            profile.rank_division = (
+                rank_division
+            )
+
+            profile.league_points = (
+                league_points
+            )
+
+            profile.ranked_wins = (
+                ranked_wins
+            )
+
+            profile.ranked_losses = (
+                ranked_losses
+            )
+
+            profile.last_synced_at = (
+                datetime.utcnow()
+            )
+
+
+        # ==================================================
+        # NEW PROFILE
+        # ==================================================
 
         else:
 
@@ -245,18 +364,47 @@ class RiotService:
                     platform=platform,
                     region=region,
                     summoner_level=(
-                        league_data.get(
+                        summoner_data.get(
                             "summonerLevel"
                         )
                     ),
                     profile_icon_id=(
-                        league_data.get(
+                        summoner_data.get(
                             "profileIconId"
                         )
                     ),
                 )
             )
 
+            profile.tier = (
+                tier
+            )
+
+            profile.rank_division = (
+                rank_division
+            )
+
+            profile.league_points = (
+                league_points
+            )
+
+            profile.ranked_wins = (
+                ranked_wins
+            )
+
+            profile.ranked_losses = (
+                ranked_losses
+            )
+
+            profile.last_synced_at = (
+                datetime.utcnow()
+            )
+
+
         self.db.commit()
+
+        self.db.refresh(
+            profile
+        )
 
         return profile
