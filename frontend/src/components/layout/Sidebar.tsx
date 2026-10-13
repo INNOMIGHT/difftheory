@@ -90,7 +90,7 @@ export default function Sidebar() {
                 </p>
 
                 <NavLink
-                    to="/ranks"
+                    to="/rank-metrics"
                     className={({ isActive }) =>
                         isActive
                             ? "sidebar-item active"
