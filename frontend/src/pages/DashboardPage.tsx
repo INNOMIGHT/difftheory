@@ -352,7 +352,7 @@ function priorityLevelText(
 }
 
 
-async function DashboardPage() {
+function DashboardPage() {
     const navigate =
         useNavigate();
 
