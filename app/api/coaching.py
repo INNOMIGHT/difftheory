@@ -346,3 +346,30 @@ def get_rank_metrics(
         service
         .get_rank_metrics()
     )
+
+
+@router.get(
+    "/riot-account/{riot_account_id}/rank-metrics"
+)
+def get_rank_metrics(
+    riot_account_id: int,
+    db: Session = Depends(
+        get_db
+    ),
+):
+
+    service = (
+        CoachingApiService(
+            db
+        )
+    )
+
+    return (
+        service
+        .get_rank_metrics(
+            riot_account_id=
+                riot_account_id,
+
+            limit=10,
+        )
+    )

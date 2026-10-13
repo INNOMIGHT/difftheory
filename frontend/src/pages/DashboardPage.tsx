@@ -500,7 +500,9 @@ async function DashboardPage() {
                                     10,
                                 ),
 
-                                getRankMetrics(),
+                                getRankMetrics(
+                                    riotAccountId
+                                ),
                             ],
                         );
 
@@ -1324,9 +1326,6 @@ async function DashboardPage() {
                                 <RankMetricsPanel
                                     data={
                                         rankMetrics
-                                    }
-                                    currentRank={
-                                        rank
                                     }
                                 />
                             )

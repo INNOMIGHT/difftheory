@@ -22,6 +22,12 @@ from pathlib import Path
 
 import pandas as pd
 
+
+from pathlib import Path
+from statistics import median
+
+import pandas as pd
+
 PROJECT_ROOT = (
     Path(__file__)
     .resolve()
@@ -100,9 +106,151 @@ class CoachingApiService:
 
 
 
+    # ==========================================================
+    # RANK METRICS
+    # ==========================================================
+
+    @staticmethod
+    def _build_player_rank_metric_values(
+        analyses,
+    ):
+
+        role_values = {}
+
+        for analysis in analyses:
+
+            role = (
+                analysis.get(
+                    "role"
+                )
+            )
+
+            rank_performance = (
+                analysis.get(
+                    "rank_performance"
+                )
+                or {}
+            )
+
+            metrics = (
+                rank_performance.get(
+                    "metrics"
+                )
+                or []
+            )
+
+            if not role:
+                continue
+
+            role_bucket = (
+                role_values.setdefault(
+                    role,
+                    {}
+                )
+            )
+
+            for metric in metrics:
+
+                key = (
+                    metric.get(
+                        "metric"
+                    )
+                )
+
+                value = (
+                    metric.get(
+                        "value"
+                    )
+                )
+
+                if (
+                    key is None
+                    or value is None
+                ):
+                    continue
+
+                role_bucket.setdefault(
+                    key,
+                    []
+                ).append(
+                    float(
+                        value
+                    )
+                )
+
+        result = {}
+
+        for (
+            role,
+            metrics,
+        ) in role_values.items():
+
+            result[
+                role
+            ] = {}
+
+            for (
+                key,
+                values,
+            ) in metrics.items():
+
+                if not values:
+                    continue
+
+                result[
+                    role
+                ][
+                    key
+                ] = round(
+                    median(
+                        values
+                    ),
+                    4,
+                )
+
+        return result
+
+
     def get_rank_metrics(
         self,
+        *,
+        riot_account_id,
+        limit=10,
     ):
+
+        riot_account, league_profile = (
+            self._get_account_data(
+                riot_account_id
+            )
+        )
+
+        cached_rows = (
+            self.match_analysis_repository
+            .get_recent_analyses(
+                riot_account_id=
+                    riot_account_id,
+
+                analysis_version=
+                    ANALYSIS_VERSION,
+
+                limit=
+                    limit,
+            )
+        )
+
+        analyses = [
+            row.analysis_json
+            for row in cached_rows
+        ]
+
+
+        player_values = (
+            self._build_player_rank_metric_values(
+                analyses
+            )
+        )
+
+
         if not RANK_TRAJECTORY_PATH.exists():
 
             raise FileNotFoundError(
@@ -130,62 +278,62 @@ class CoachingApiService:
         ]
 
 
-        metrics = [
-            "cs_per_min",
-            "gold_per_min",
-            "cs_at_10",
-            "gold_at_10",
-            "xp_at_10",
-            "kda",
-            "deaths",
-        ]
+        metric_config = {
+            "cs_per_min": {
+                "label":
+                    "CS / MIN",
 
+                "direction":
+                    "HIGHER_BETTER",
+            },
 
-        metric_labels = {
-            "cs_per_min":
-                "CS / MIN",
+            "gold_per_min": {
+                "label":
+                    "GOLD / MIN",
 
-            "gold_per_min":
-                "GOLD / MIN",
+                "direction":
+                    "HIGHER_BETTER",
+            },
 
-            "cs_at_10":
-                "CS @ 10",
+            "cs_at_10": {
+                "label":
+                    "CS @ 10",
 
-            "gold_at_10":
-                "GOLD @ 10",
+                "direction":
+                    "HIGHER_BETTER",
+            },
 
-            "xp_at_10":
-                "XP @ 10",
+            "gold_at_10": {
+                "label":
+                    "GOLD @ 10",
 
-            "kda":
-                "KDA",
+                "direction":
+                    "HIGHER_BETTER",
+            },
 
-            "deaths":
-                "DEATHS",
-        }
+            "xp_at_10": {
+                "label":
+                    "XP @ 10",
 
+                "direction":
+                    "HIGHER_BETTER",
+            },
 
-        metric_direction = {
-            "cs_per_min":
-                "HIGHER_BETTER",
+            "kda": {
+                "label":
+                    "KDA",
 
-            "gold_per_min":
-                "HIGHER_BETTER",
+                "direction":
+                    "HIGHER_BETTER",
+            },
 
-            "cs_at_10":
-                "HIGHER_BETTER",
+            "deaths": {
+                "label":
+                    "DEATHS",
 
-            "gold_at_10":
-                "HIGHER_BETTER",
-
-            "xp_at_10":
-                "HIGHER_BETTER",
-
-            "kda":
-                "HIGHER_BETTER",
-
-            "deaths":
-                "LOWER_BETTER",
+                "direction":
+                    "LOWER_BETTER",
+            },
         }
 
 
@@ -193,38 +341,48 @@ class CoachingApiService:
 
 
         for role in sorted(
-            df["role"]
+            df[
+                "role"
+            ]
             .dropna()
             .unique()
         ):
 
             role_df = (
                 df[
-                    df["role"]
+                    df[
+                        "role"
+                    ]
                     == role
                 ]
             )
 
 
-            role_metrics = []
+            metrics = []
 
 
-            for metric in metrics:
+            for (
+                metric_key,
+                config,
+            ) in metric_config.items():
 
-                row = (
+                metric_rows = (
                     role_df[
-                        role_df["metric"]
-                        == metric
+                        role_df[
+                            "metric"
+                        ]
+                        == metric_key
                     ]
                 )
 
-
-                if row.empty:
+                if metric_rows.empty:
                     continue
 
 
                 row = (
-                    row.iloc[0]
+                    metric_rows.iloc[
+                        0
+                    ]
                 )
 
 
@@ -237,13 +395,11 @@ class CoachingApiService:
                         f"{rank.lower()}_p50"
                     )
 
-
                     value = (
                         row.get(
                             column
                         )
                     )
-
 
                     values.append({
                         "rank":
@@ -251,37 +407,51 @@ class CoachingApiService:
 
                         "value":
                             (
-                                float(value)
-                                if pd.notna(value)
+                                float(
+                                    value
+                                )
+                                if pd.notna(
+                                    value
+                                )
                                 else None
                             ),
                     })
 
 
-                role_metrics.append({
+                metrics.append({
                     "key":
-                        metric,
+                        metric_key,
 
                     "label":
-                        metric_labels[
-                            metric
+                        config[
+                            "label"
                         ],
 
                     "direction":
-                        metric_direction[
-                            metric
+                        config[
+                            "direction"
                         ],
+
+                    "player_value":
+                        (
+                            player_values
+                            .get(
+                                role,
+                                {}
+                            )
+                            .get(
+                                metric_key
+                            )
+                        ),
 
                     "values":
                         values,
 
                     "monotonicity":
-                        (
-                            float(
-                                row[
-                                    "monotonicity_score"
-                                ]
-                            )
+                        float(
+                            row[
+                                "monotonicity_score"
+                            ]
                         ),
 
                     "direction_changes":
@@ -300,12 +470,32 @@ class CoachingApiService:
 
             roles[
                 role
-            ] = (
-                role_metrics
-            )
+            ] = {
+                "player_matches":
+                    sum(
+                        1
+                        for analysis
+                        in analyses
+                        if analysis.get(
+                            "role"
+                        )
+                        == role
+                    ),
+
+                "metrics":
+                    metrics,
+            }
 
 
         return {
+            "riot_account_id":
+                riot_account_id,
+
+            "current_rank":
+                self._get_player_rank(
+                    league_profile
+                ),
+
             "ranks":
                 ranks,
 

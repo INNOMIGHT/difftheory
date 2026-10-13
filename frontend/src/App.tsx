@@ -34,6 +34,7 @@ import PrivacyPage
 
 import TermsPage
     from "./pages/TermsPage";
+import RankMetricsPage from "./pages/RankMetricsPage";
 
 
 export default function App() {
@@ -127,6 +128,13 @@ export default function App() {
                             path="/roles"
                             element={
                                 <DashboardPage />
+                            }
+                        />
+
+                        <Route
+                            path="/rank-metrics"
+                            element={
+                                <RankMetricsPage />
                             }
                         />
 

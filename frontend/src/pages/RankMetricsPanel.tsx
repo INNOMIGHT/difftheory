@@ -4,9 +4,10 @@ import {
 } from "react";
 
 import {
+    CartesianGrid,
     Line,
     LineChart,
-    CartesianGrid,
+    ReferenceDot,
     ResponsiveContainer,
     Tooltip,
     XAxis,
@@ -41,14 +42,11 @@ const ROLE_LABELS: Record<
 
 type Props = {
     data: RankMetricsResponse;
-
-    currentRank?: string;
 };
 
 
 export default function RankMetricsPanel({
     data,
-    currentRank,
 }: Props) {
 
     const roles =
@@ -60,29 +58,37 @@ export default function RankMetricsPanel({
     const [
         selectedRole,
         setSelectedRole,
-    ] = useState(
-        roles.includes(
-            "MIDDLE"
-        )
-            ? "MIDDLE"
-            : roles[0]
-    );
+    ] =
+        useState(
+            roles.includes(
+                "MIDDLE"
+            )
+                ? "MIDDLE"
+                : roles[0]
+        );
+
+
+    const roleData =
+        data.roles[
+            selectedRole
+        ];
 
 
     const roleMetrics =
-        data.roles[
-            selectedRole
-        ]
+        roleData?.metrics
         ?? [];
 
 
     const [
         selectedMetricKey,
         setSelectedMetricKey,
-    ] = useState(
-        roleMetrics[0]?.key
-        ?? "cs_per_min"
-    );
+    ] =
+        useState(
+            roleMetrics[
+                0
+            ]?.key
+            ?? "cs_per_min"
+        );
 
 
     const selectedMetric =
@@ -103,6 +109,7 @@ export default function RankMetricsPanel({
                 if (
                     !selectedMetric
                 ) {
+
                     return [];
                 }
 
@@ -131,9 +138,74 @@ export default function RankMetricsPanel({
 
     if (
         !selectedMetric
+        || !selectedRole
     ) {
+
         return null;
     }
+
+
+    const playerValue =
+        selectedMetric
+        .player_value;
+
+
+    const currentRank =
+        data.current_rank;
+
+
+    const currentRankBenchmark =
+        selectedMetric
+        .values
+        .find(
+            (
+                item
+            ) =>
+                item.rank
+                === currentRank
+        )
+        ?.value
+        ?? null;
+
+
+    const currentRankIndex =
+        currentRank
+            ? data.ranks.indexOf(
+                currentRank
+            )
+            : -1;
+
+
+    const nextRank =
+        (
+            currentRankIndex >= 0
+            &&
+            currentRankIndex
+            <
+            data.ranks.length - 1
+        )
+            ? data.ranks[
+                currentRankIndex + 1
+            ]
+            : null;
+
+
+    const nextRankBenchmark =
+        nextRank
+            ? (
+                selectedMetric
+                .values
+                .find(
+                    (
+                        item
+                    ) =>
+                        item.rank
+                        === nextRank
+                )
+                ?.value
+                ?? null
+            )
+            : null;
 
 
     return (
@@ -154,12 +226,14 @@ export default function RankMetricsPanel({
                     </p>
 
                     <h2>
-                        How performance changes
-                        across the ladder
+                        Your gameplay against
+                        the League ladder
                     </h2>
 
                     <p>
-                        Median performance benchmarks
+                        Compare your recent
+                        role-specific performance
+                        with median benchmarks
                         from Iron through Challenger.
                     </p>
 
@@ -198,11 +272,14 @@ export default function RankMetricsPanel({
                                             role
                                         );
 
+
                                         const nextMetrics =
                                             data.roles[
                                                 role
                                             ]
+                                            ?.metrics
                                             ?? [];
+
 
                                         setSelectedMetricKey(
                                             nextMetrics[
@@ -303,6 +380,13 @@ export default function RankMetricsPanel({
 
                             <span>
                                 {
+                                    ROLE_LABELS[
+                                        selectedRole
+                                    ]
+                                    ?? selectedRole
+                                }
+                                {" · "}
+                                {
                                     selectedMetric.label
                                 }
                             </span>
@@ -328,21 +412,15 @@ export default function RankMetricsPanel({
                         >
 
                             <span>
-                                Monotonicity
+                                Recent games
                             </span>
 
                             <strong>
                                 {
-                                    (
-                                        selectedMetric
-                                        .monotonicity
-                                        * 100
-                                    )
-                                    .toFixed(
-                                        0
-                                    )
+                                    roleData
+                                    ?.player_matches
+                                    ?? 0
                                 }
-                                %
                             </strong>
 
                         </div>
@@ -356,7 +434,7 @@ export default function RankMetricsPanel({
 
                         <ResponsiveContainer
                             width="100%"
-                            height={360}
+                            height={420}
                         >
 
                             <LineChart
@@ -365,9 +443,9 @@ export default function RankMetricsPanel({
                                 }
                                 margin={
                                     {
-                                        top: 20,
-                                        right: 24,
-                                        bottom: 10,
+                                        top: 30,
+                                        right: 30,
+                                        bottom: 20,
                                         left: 10,
                                     }
                                 }
@@ -378,17 +456,20 @@ export default function RankMetricsPanel({
                                     vertical={false}
                                 />
 
+
                                 <XAxis
                                     dataKey="rank"
                                     tickLine={false}
                                     axisLine={false}
                                 />
 
+
                                 <YAxis
                                     tickLine={false}
                                     axisLine={false}
-                                    width={55}
+                                    width={60}
                                 />
+
 
                                 <Tooltip
                                     formatter={
@@ -397,8 +478,11 @@ export default function RankMetricsPanel({
                                         ) => {
 
                                             if (
-                                                value === undefined
-                                                || value === null
+                                                value
+                                                === undefined
+                                                ||
+                                                value
+                                                === null
                                             ) {
 
                                                 return [
@@ -421,9 +505,13 @@ export default function RankMetricsPanel({
                                     }
                                 />
 
+
                                 <Line
                                     type="monotone"
                                     dataKey="value"
+                                    name={
+                                        selectedMetric.label
+                                    }
                                     stroke="currentColor"
                                     strokeWidth={3}
                                     dot={
@@ -438,6 +526,40 @@ export default function RankMetricsPanel({
                                     }
                                 />
 
+
+                                {
+                                    (
+                                        currentRank
+                                        &&
+                                        playerValue
+                                        !== null
+                                    )
+                                    && (
+
+                                        <ReferenceDot
+                                            x={
+                                                currentRank
+                                            }
+                                            y={
+                                                playerValue
+                                            }
+                                            r={9}
+                                            fill="#ff4d67"
+                                            stroke="#ffffff"
+                                            strokeWidth={3}
+                                            label={
+                                                {
+                                                    value:
+                                                        "YOU",
+
+                                                    position:
+                                                        "top",
+                                                }
+                                            }
+                                        />
+                                    )
+                                }
+
                             </LineChart>
 
                         </ResponsiveContainer>
@@ -445,26 +567,88 @@ export default function RankMetricsPanel({
                     </div>
 
 
-                    {
-                        currentRank
-                        && (
+                    <div
+                        className="rank-player-comparison"
+                    >
 
-                            <div
-                                className="current-rank-note"
-                            >
+                        <div>
 
-                                Your current rank:
+                            <span>
+                                YOUR RECENT MEDIAN
+                            </span>
+
+                            <strong>
+                                {
+                                    playerValue
+                                    !== null
+
+                                        ? playerValue.toFixed(
+                                            2
+                                        )
+
+                                        : "—"
+                                }
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                {
+                                    currentRank
+                                    ?? "CURRENT RANK"
+                                }
                                 {" "}
+                                MEDIAN
+                            </span>
 
-                                <strong>
-                                    {
-                                        currentRank
-                                    }
-                                </strong>
+                            <strong>
+                                {
+                                    currentRankBenchmark
+                                    !== null
 
-                            </div>
-                        )
-                    }
+                                        ? currentRankBenchmark
+                                            .toFixed(
+                                                2
+                                            )
+
+                                        : "—"
+                                }
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                {
+                                    nextRank
+                                    ?? "NEXT RANK"
+                                }
+                                {" "}
+                                MEDIAN
+                            </span>
+
+                            <strong>
+                                {
+                                    nextRankBenchmark
+                                    !== null
+
+                                        ? nextRankBenchmark
+                                            .toFixed(
+                                                2
+                                            )
+
+                                        : "—"
+                                }
+                            </strong>
+
+                        </div>
+
+                    </div>
 
                 </div>
 

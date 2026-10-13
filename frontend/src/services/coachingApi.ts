@@ -207,11 +207,16 @@ export type RankMetricValue = {
 
 export type RankMetric = {
     key: string;
+
     label: string;
 
     direction:
         | "HIGHER_BETTER"
         | "LOWER_BETTER";
+
+    player_value:
+        number
+        | null;
 
     values: RankMetricValue[];
 
@@ -223,18 +228,32 @@ export type RankMetric = {
 };
 
 
+export type RankRoleMetrics = {
+    player_matches: number;
+
+    metrics: RankMetric[];
+};
+
+
 export type RankMetricsResponse = {
+    riot_account_id: number;
+
+    current_rank:
+        string
+        | null;
+
     ranks: string[];
 
     roles: Record<
         string,
-        RankMetric[]
+        RankRoleMetrics
     >;
 };
 
 
-export async function getRankMetrics():
-    Promise<RankMetricsResponse> {
+export async function getRankMetrics(
+    riotAccountId: number,
+): Promise<RankMetricsResponse> {
 
     const baseUrl =
         import.meta.env.VITE_API_BASE_URL
@@ -243,7 +262,7 @@ export async function getRankMetrics():
 
     const response =
         await fetch(
-            `${baseUrl}/coaching/rank-metrics`,
+            `${baseUrl}/coaching/riot-account/${riotAccountId}/rank-metrics`,
             {
                 headers: {
                     ...getAuthorizationHeaders(),
@@ -252,7 +271,9 @@ export async function getRankMetrics():
         );
 
 
-    if (!response.ok) {
+    if (
+        !response.ok
+    ) {
 
         throw new Error(
             "Unable to load rank metrics.",
