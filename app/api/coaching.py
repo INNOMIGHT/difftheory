@@ -324,3 +324,25 @@ def refresh_player_coaching(
             status_code=404,
             detail=str(exc),
         )
+
+
+
+@router.get(
+    "/rank-metrics"
+)
+def get_rank_metrics(
+    db: Session = Depends(
+        get_db
+    ),
+):
+
+    service = (
+        CoachingApiService(
+            db
+        )
+    )
+
+    return (
+        service
+        .get_rank_metrics()
+    )

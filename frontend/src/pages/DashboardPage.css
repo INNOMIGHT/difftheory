@@ -2171,3 +2171,135 @@
     font-size: 8px;
     line-height: 1.65;
 }
+
+
+.rank-metrics-card {
+    margin-top: 28px;
+    padding: 26px;
+    border-radius: 24px;
+    background: var(--surface, #101217);
+    border: 1px solid rgba(255,255,255,.08);
+}
+
+.rank-metrics-header h2 {
+    margin: 4px 0 6px;
+}
+
+.rank-metrics-header p {
+    opacity: .72;
+}
+
+.rank-role-tabs {
+    display: flex;
+    gap: 8px;
+    margin-top: 22px;
+    flex-wrap: wrap;
+}
+
+.rank-role-tabs button {
+    border: 1px solid rgba(255,255,255,.1);
+    background: transparent;
+    border-radius: 999px;
+    padding: 8px 14px;
+    cursor: pointer;
+}
+
+.rank-role-tabs button.active {
+    background: rgba(255,255,255,.1);
+}
+
+.rank-metrics-layout {
+    display: grid;
+    grid-template-columns: 190px 1fr;
+    gap: 24px;
+    margin-top: 22px;
+}
+
+.rank-metric-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.rank-metric-selector button {
+    text-align: left;
+    padding: 12px 14px;
+    border-radius: 14px;
+    border: 1px solid transparent;
+    background: transparent;
+    cursor: pointer;
+}
+
+.rank-metric-selector button span {
+    display: block;
+    font-weight: 700;
+}
+
+.rank-metric-selector button small {
+    display: block;
+    margin-top: 3px;
+    opacity: .55;
+}
+
+.rank-metric-selector button.active {
+    background: rgba(255,255,255,.08);
+    border-color: rgba(255,255,255,.12);
+}
+
+.rank-metric-chart {
+    min-width: 0;
+}
+
+.rank-chart-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.rank-chart-head span {
+    display: block;
+    font-size: 12px;
+    opacity: .55;
+}
+
+.rank-chart-head strong {
+    display: block;
+    margin-top: 3px;
+}
+
+.rank-chart-meta {
+    text-align: right;
+}
+
+.rank-chart-wrapper {
+    width: 100%;
+    min-height: 360px;
+}
+
+.current-rank-note {
+    margin-top: 8px;
+    font-size: 13px;
+    opacity: .7;
+}
+
+@media (
+    max-width: 850px
+) {
+
+    .rank-metrics-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .rank-metric-selector {
+        display: grid;
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
+    }
+}

@@ -37,11 +37,13 @@ import {
 import {
     getPlayerCoaching,
     getPlayerMatches,
+    getRankMetrics,
     refreshPlayerCoaching,
 } from "../services/coachingApi";
 
 import type {
     DashboardMatch,
+    RankMetricsResponse,
 } from "../services/coachingApi";
 
 import type {
@@ -59,6 +61,7 @@ import "./DashboardPage.css";
 import {
     useAuth,
 } from "../auth/AuthContext";
+import RankMetricsPanel from "./RankMetricsPanel";
 
 
 
@@ -349,7 +352,7 @@ function priorityLevelText(
 }
 
 
-function DashboardPage() {
+async function DashboardPage() {
     const navigate =
         useNavigate();
 
@@ -377,6 +380,19 @@ function DashboardPage() {
     >(
         [],
     );
+
+    
+    const [
+        rankMetrics,
+        setRankMetrics,
+    ] =
+        useState<
+            RankMetricsResponse
+            | null
+        >(
+            null
+        );
+
 
     const [
         loading,
@@ -471,6 +487,7 @@ function DashboardPage() {
                     const [
                         coachingResponse,
                         matchesResponse,
+                        rankMetricsResponse,
                     ] =
                         await Promise.all(
                             [
@@ -482,16 +499,25 @@ function DashboardPage() {
                                     riotAccountId,
                                     10,
                                 ),
+
+                                getRankMetrics(),
                             ],
                         );
+
 
                     setData(
                         coachingResponse,
                     );
 
+
                     setMatches(
                         matchesResponse.matches
                         ?? [],
+                    );
+
+
+                    setRankMetrics(
+                        rankMetricsResponse,
                     );
                 }
                 catch (
@@ -602,6 +628,8 @@ function DashboardPage() {
 
     const readiness =
         coaching?.rank_readiness;
+        
+
 
     const categories =
         coaching?.category_summary
@@ -1284,6 +1312,25 @@ function DashboardPage() {
                                 rank
                             }
                         />
+
+
+                        {/* ==================================================
+                            RANK METRICS
+                        ================================================== */}
+
+                        {
+                            rankMetrics
+                            && (
+                                <RankMetricsPanel
+                                    data={
+                                        rankMetrics
+                                    }
+                                    currentRank={
+                                        rank
+                                    }
+                                />
+                            )
+                        }
 
 
                         {/* ==================================================

@@ -197,3 +197,68 @@ export async function getMatchAnalysis(
 
     return response.json();
 }
+
+
+export type RankMetricValue = {
+    rank: string;
+    value: number | null;
+};
+
+
+export type RankMetric = {
+    key: string;
+    label: string;
+
+    direction:
+        | "HIGHER_BETTER"
+        | "LOWER_BETTER";
+
+    values: RankMetricValue[];
+
+    monotonicity: number;
+
+    direction_changes: number;
+
+    trajectory_confidence: string;
+};
+
+
+export type RankMetricsResponse = {
+    ranks: string[];
+
+    roles: Record<
+        string,
+        RankMetric[]
+    >;
+};
+
+
+export async function getRankMetrics():
+    Promise<RankMetricsResponse> {
+
+    const baseUrl =
+        import.meta.env.VITE_API_BASE_URL
+        ?? "http://127.0.0.1:8000";
+
+
+    const response =
+        await fetch(
+            `${baseUrl}/coaching/rank-metrics`,
+            {
+                headers: {
+                    ...getAuthorizationHeaders(),
+                },
+            },
+        );
+
+
+    if (!response.ok) {
+
+        throw new Error(
+            "Unable to load rank metrics.",
+        );
+    }
+
+
+    return response.json();
+}

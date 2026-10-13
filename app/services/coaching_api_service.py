@@ -18,6 +18,23 @@ from app.repositories.match_analysis_repository import (
     MatchAnalysisRepository,
 )
 
+from pathlib import Path
+
+import pandas as pd
+
+PROJECT_ROOT = (
+    Path(__file__)
+    .resolve()
+    .parents[2]
+)
+
+RANK_TRAJECTORY_PATH = (
+    PROJECT_ROOT
+    / "artifacts"
+    / "rank_baseline"
+    / "trajectories"
+    / "IRON_to_CHALLENGER_trajectories.csv"
+)
 
 class CoachingApiService:
 
@@ -80,6 +97,221 @@ class CoachingApiService:
             riot_account,
             league_profile,
         )
+
+
+
+    def get_rank_metrics(
+        self,
+    ):
+        if not RANK_TRAJECTORY_PATH.exists():
+
+            raise FileNotFoundError(
+                f"Missing rank trajectory file: "
+                f"{RANK_TRAJECTORY_PATH}"
+            )
+
+
+        df = pd.read_csv(
+            RANK_TRAJECTORY_PATH
+        )
+
+
+        ranks = [
+            "IRON",
+            "BRONZE",
+            "SILVER",
+            "GOLD",
+            "PLATINUM",
+            "EMERALD",
+            "DIAMOND",
+            "MASTER",
+            "GRANDMASTER",
+            "CHALLENGER",
+        ]
+
+
+        metrics = [
+            "cs_per_min",
+            "gold_per_min",
+            "cs_at_10",
+            "gold_at_10",
+            "xp_at_10",
+            "kda",
+            "deaths",
+        ]
+
+
+        metric_labels = {
+            "cs_per_min":
+                "CS / MIN",
+
+            "gold_per_min":
+                "GOLD / MIN",
+
+            "cs_at_10":
+                "CS @ 10",
+
+            "gold_at_10":
+                "GOLD @ 10",
+
+            "xp_at_10":
+                "XP @ 10",
+
+            "kda":
+                "KDA",
+
+            "deaths":
+                "DEATHS",
+        }
+
+
+        metric_direction = {
+            "cs_per_min":
+                "HIGHER_BETTER",
+
+            "gold_per_min":
+                "HIGHER_BETTER",
+
+            "cs_at_10":
+                "HIGHER_BETTER",
+
+            "gold_at_10":
+                "HIGHER_BETTER",
+
+            "xp_at_10":
+                "HIGHER_BETTER",
+
+            "kda":
+                "HIGHER_BETTER",
+
+            "deaths":
+                "LOWER_BETTER",
+        }
+
+
+        roles = {}
+
+
+        for role in sorted(
+            df["role"]
+            .dropna()
+            .unique()
+        ):
+
+            role_df = (
+                df[
+                    df["role"]
+                    == role
+                ]
+            )
+
+
+            role_metrics = []
+
+
+            for metric in metrics:
+
+                row = (
+                    role_df[
+                        role_df["metric"]
+                        == metric
+                    ]
+                )
+
+
+                if row.empty:
+                    continue
+
+
+                row = (
+                    row.iloc[0]
+                )
+
+
+                values = []
+
+
+                for rank in ranks:
+
+                    column = (
+                        f"{rank.lower()}_p50"
+                    )
+
+
+                    value = (
+                        row.get(
+                            column
+                        )
+                    )
+
+
+                    values.append({
+                        "rank":
+                            rank,
+
+                        "value":
+                            (
+                                float(value)
+                                if pd.notna(value)
+                                else None
+                            ),
+                    })
+
+
+                role_metrics.append({
+                    "key":
+                        metric,
+
+                    "label":
+                        metric_labels[
+                            metric
+                        ],
+
+                    "direction":
+                        metric_direction[
+                            metric
+                        ],
+
+                    "values":
+                        values,
+
+                    "monotonicity":
+                        (
+                            float(
+                                row[
+                                    "monotonicity_score"
+                                ]
+                            )
+                        ),
+
+                    "direction_changes":
+                        int(
+                            row[
+                                "direction_changes"
+                            ]
+                        ),
+
+                    "trajectory_confidence":
+                        row[
+                            "trajectory_confidence"
+                        ],
+                })
+
+
+            roles[
+                role
+            ] = (
+                role_metrics
+            )
+
+
+        return {
+            "ranks":
+                ranks,
+
+            "roles":
+                roles,
+        }
 
     # ==========================================================
     # RANK
