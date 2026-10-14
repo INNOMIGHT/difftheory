@@ -18,6 +18,8 @@ import type {
     RankMetricsResponse,
 } from "../services/coachingApi";
 
+import "./DashboardPage.css";
+
 
 const ROLE_LABELS: Record<
     string,
@@ -43,6 +45,52 @@ const ROLE_LABELS: Record<
 type Props = {
     data: RankMetricsResponse;
 };
+
+
+function formatMetricValue(
+    metricKey: string,
+    value: number | null,
+) {
+
+    if (
+        value === null
+        || value === undefined
+    ) {
+        return "—";
+    }
+
+
+    switch (
+        metricKey
+    ) {
+
+        case "gold_per_min":
+        case "gold_at_10":
+        case "xp_at_10":
+        case "xp_per_min":
+            return Math.round(
+                value
+            ).toLocaleString();
+
+
+        case "deaths":
+            return value.toFixed(
+                1
+            );
+
+
+        case "cs_at_10":
+            return value.toFixed(
+                1
+            );
+
+
+        default:
+            return value.toFixed(
+                2
+            );
+    }
+}
 
 
 export default function RankMetricsPanel({
@@ -84,10 +132,20 @@ export default function RankMetricsPanel({
         setSelectedMetricKey,
     ] =
         useState(
+            roleMetrics.find(
+                (
+                    metric
+                ) =>
+                    metric.key
+                    === "cs_per_min"
+            )
+            ?.key
+            ??
             roleMetrics[
                 0
             ]?.key
-            ?? "cs_per_min"
+            ??
+            "cs_per_min"
         );
 
 
@@ -109,7 +167,6 @@ export default function RankMetricsPanel({
                 if (
                     !selectedMetric
                 ) {
-
                     return [];
                 }
 
@@ -208,6 +265,32 @@ export default function RankMetricsPanel({
             : null;
 
 
+    const playerVsCurrent =
+        (
+            playerValue !== null
+            &&
+            currentRankBenchmark !== null
+        )
+            ? (
+                playerValue
+                - currentRankBenchmark
+            )
+            : null;
+
+
+    const playerVsNext =
+        (
+            playerValue !== null
+            &&
+            nextRankBenchmark !== null
+        )
+            ? (
+                playerValue
+                - nextRankBenchmark
+            )
+            : null;
+
+
     return (
         <section
             className="rank-metrics-card"
@@ -233,7 +316,7 @@ export default function RankMetricsPanel({
                     <p>
                         Compare your recent
                         role-specific performance
-                        with median benchmarks
+                        against median benchmarks
                         from Iron through Challenger.
                     </p>
 
@@ -260,9 +343,7 @@ export default function RankMetricsPanel({
                                 className={
                                     role
                                     === selectedRole
-
                                         ? "active"
-
                                         : ""
                                 }
                                 onClick={
@@ -281,11 +362,24 @@ export default function RankMetricsPanel({
                                             ?? [];
 
 
+                                        const preferredMetric =
+                                            nextMetrics.find(
+                                                (
+                                                    metric
+                                                ) =>
+                                                    metric.key
+                                                    === "cs_per_min"
+                                            );
+
+
                                         setSelectedMetricKey(
+                                            preferredMetric?.key
+                                            ??
                                             nextMetrics[
                                                 0
                                             ]?.key
-                                            ?? ""
+                                            ??
+                                            ""
                                         );
                                     }
                                 }
@@ -328,9 +422,7 @@ export default function RankMetricsPanel({
                                     className={
                                         metric.key
                                         === selectedMetric.key
-
                                             ? "active"
-
                                             : ""
                                     }
                                     onClick={
@@ -352,9 +444,7 @@ export default function RankMetricsPanel({
                                         {
                                             metric.direction
                                             === "LOWER_BETTER"
-
                                                 ? "Lower is better"
-
                                                 : "Higher is better"
                                         }
 
@@ -396,9 +486,7 @@ export default function RankMetricsPanel({
                                 {
                                     selectedMetric.direction
                                     === "LOWER_BETTER"
-
                                         ? "Lower values are generally better"
-
                                         : "Higher values are generally better"
                                 }
 
@@ -443,8 +531,8 @@ export default function RankMetricsPanel({
                                 }
                                 margin={
                                     {
-                                        top: 30,
-                                        right: 30,
+                                        top: 35,
+                                        right: 35,
                                         bottom: 20,
                                         left: 10,
                                     }
@@ -454,6 +542,7 @@ export default function RankMetricsPanel({
                                 <CartesianGrid
                                     strokeDasharray="3 3"
                                     vertical={false}
+                                    stroke="rgba(255,255,255,0.08)"
                                 />
 
 
@@ -461,28 +550,71 @@ export default function RankMetricsPanel({
                                     dataKey="rank"
                                     tickLine={false}
                                     axisLine={false}
+                                    tick={
+                                        {
+                                            fill:
+                                                "rgba(255,255,255,0.65)",
+                                        }
+                                    }
                                 />
 
 
                                 <YAxis
                                     tickLine={false}
                                     axisLine={false}
-                                    width={60}
+                                    width={65}
+                                    tick={
+                                        {
+                                            fill:
+                                                "rgba(255,255,255,0.65)",
+                                        }
+                                    }
                                 />
 
 
                                 <Tooltip
+                                    contentStyle={
+                                        {
+                                            background:
+                                                "#111318",
+
+                                            border:
+                                                "1px solid rgba(255,255,255,0.12)",
+
+                                            borderRadius:
+                                                "12px",
+
+                                            color:
+                                                "#ffffff",
+
+                                            boxShadow:
+                                                "0 12px 30px rgba(0,0,0,0.35)",
+                                        }
+                                    }
+                                    labelStyle={
+                                        {
+                                            color:
+                                                "rgba(255,255,255,0.72)",
+
+                                            fontWeight:
+                                                700,
+                                        }
+                                    }
+                                    itemStyle={
+                                        {
+                                            color:
+                                                "#ffffff",
+                                        }
+                                    }
                                     formatter={
                                         (
                                             value
                                         ) => {
 
                                             if (
-                                                value
-                                                === undefined
+                                                value === undefined
                                                 ||
-                                                value
-                                                === null
+                                                value === null
                                             ) {
 
                                                 return [
@@ -493,10 +625,11 @@ export default function RankMetricsPanel({
 
 
                                             return [
-                                                Number(
-                                                    value
-                                                ).toFixed(
-                                                    2
+                                                formatMetricValue(
+                                                    selectedMetric.key,
+                                                    Number(
+                                                        value
+                                                    ),
                                                 ),
 
                                                 selectedMetric.label,
@@ -554,6 +687,12 @@ export default function RankMetricsPanel({
 
                                                     position:
                                                         "top",
+
+                                                    fill:
+                                                        "#ff4d67",
+
+                                                    fontWeight:
+                                                        800,
                                                 }
                                             }
                                         />
@@ -579,14 +718,10 @@ export default function RankMetricsPanel({
 
                             <strong>
                                 {
-                                    playerValue
-                                    !== null
-
-                                        ? playerValue.toFixed(
-                                            2
-                                        )
-
-                                        : "—"
+                                    formatMetricValue(
+                                        selectedMetric.key,
+                                        playerValue
+                                    )
                                 }
                             </strong>
 
@@ -606,15 +741,10 @@ export default function RankMetricsPanel({
 
                             <strong>
                                 {
-                                    currentRankBenchmark
-                                    !== null
-
-                                        ? currentRankBenchmark
-                                            .toFixed(
-                                                2
-                                            )
-
-                                        : "—"
+                                    formatMetricValue(
+                                        selectedMetric.key,
+                                        currentRankBenchmark
+                                    )
                                 }
                             </strong>
 
@@ -634,19 +764,80 @@ export default function RankMetricsPanel({
 
                             <strong>
                                 {
-                                    nextRankBenchmark
-                                    !== null
-
-                                        ? nextRankBenchmark
-                                            .toFixed(
-                                                2
-                                            )
-
-                                        : "—"
+                                    formatMetricValue(
+                                        selectedMetric.key,
+                                        nextRankBenchmark
+                                    )
                                 }
                             </strong>
 
                         </div>
+
+                    </div>
+
+
+                    <div
+                        className="rank-metric-deltas"
+                    >
+
+                        {
+                            playerVsCurrent !== null
+                            && (
+
+                                <div>
+
+                                    <span>
+                                        VS CURRENT RANK
+                                    </span>
+
+                                    <strong>
+                                        {
+                                            playerVsCurrent >= 0
+                                                ? "+"
+                                                : ""
+                                        }
+
+                                        {
+                                            formatMetricValue(
+                                                selectedMetric.key,
+                                                playerVsCurrent
+                                            )
+                                        }
+                                    </strong>
+
+                                </div>
+                            )
+                        }
+
+
+                        {
+                            playerVsNext !== null
+                            && (
+
+                                <div>
+
+                                    <span>
+                                        VS NEXT RANK
+                                    </span>
+
+                                    <strong>
+                                        {
+                                            playerVsNext >= 0
+                                                ? "+"
+                                                : ""
+                                        }
+
+                                        {
+                                            formatMetricValue(
+                                                selectedMetric.key,
+                                                playerVsNext
+                                            )
+                                        }
+                                    </strong>
+
+                                </div>
+                            )
+                        }
 
                     </div>
 
